@@ -5,8 +5,8 @@ import seaborn as sns
 from helper import plot_steps, plot_rewards
 
 q = np.loadtxt('data/q_car.txt')
-total_steps_main = np.loadtxt('data/total_steps_main.txt')
-avg_reward_main = np.loadtxt('data/avg_reward_main.txt')
+total_steps_main = np.loadtxt('data/total_steps.txt')
+avg_reward_main = np.loadtxt('data/avg_rewards.txt')
 
 # Plot Q table heatmap
 chosen = np.max(q, axis=1)
@@ -34,6 +34,7 @@ plt.xlabel("Position", fontsize=20)
 plt.ylabel("Velocity", fontsize=20)
 plt.title("V scores for optimal action", fontdict={'fontsize': 25})
 plt.savefig('plots/v_values')
+plt.close()
 
 # Plot V values for each action over state space
 reshaped = np.reshape(q, (20, 20, 3))
@@ -46,6 +47,7 @@ for i in range(3):
     plt.ylabel("Velocity", fontsize=20)
     plt.title(f"V scores for action: {labels[i]}", fontdict={'fontsize': 25})
     plt.savefig(f'plots/v_values_{i}')
+    plt.close()
 
 # Plot Total Steps and average rewards
 plot_rewards(avg_reward_main, 'main')
@@ -62,7 +64,8 @@ plt.ylim(0, 20)
 plt.xlabel("Position", fontsize=20)
 plt.ylabel("Velocity", fontsize=20)
 plt.title("V scores for optimal action - random init", fontdict={'fontsize': 25})
-plt.savefig('plots/v_values_random')
+plt.savefig('plots/v_values_rand')
+plt.close()
 
 # Plot Q table heatmap for random init
 plt.figure(figsize=(12, 12))
@@ -77,11 +80,11 @@ plt.yticks(range(0, 20))
 bound = np.linspace(0, 1, 4)
 labels = ['Move Left', 'Do Nothing', 'Move Right']
 plt.legend([mpatches.Patch(color=cmap(b)) for b in bound[:-1]], [labels[i] for i in range(3)])
-plt.savefig('plots/best_actions_random.png')
+plt.savefig('plots/best_actions_rand.png')
 plt.close()
 
 # Plot total steps and average rewards for random init
 total_steps_rand = np.loadtxt('data/total_steps_rand.txt')
-avg_reward_rand = np.loadtxt('data/avg_steps_rand.txt')
+avg_reward_rand = np.loadtxt('data/avg_rewards_rand.txt')
 plot_steps(total_steps_rand, 'rand')
 plot_rewards(avg_reward_rand, 'rand')

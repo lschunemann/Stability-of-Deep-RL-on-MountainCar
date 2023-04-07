@@ -1,0 +1,89 @@
+Trial: 9 - Model: 1_0.005	 Mean_reward=-150.86 +/- 12.97
+Trial: 9 - Model: 1_0.01	 Mean_reward=-193.41 +/- 38.54
+Trial: 9 - Model: 0.5_0.005	 Mean_reward=-149.01 +/- 14.84
+Trial: 9 - Model: 0.5_0.01	 Mean_reward=-146.10 +/- 16.50
+Trial: 9 - Model: 0.25_0.005	 Mean_reward=-142.19 +/- 14.79
+Trial: 9 - Model: 0.25_0.01	 Mean_reward=-155.38 +/- 24.72
+Trial: 9 - Model: step_100	 Mean_reward=-163.82 +/- 14.70
+Trial: 9 - Model: fixed	 Mean_reward=-146.63 +/- 12.80
+Trial: 19 - Model: 1_0.005	 Mean_reward=-150.63 +/- 12.67
+Trial: 19 - Model: 1_0.01	 Mean_reward=-198.40 +/- 36.36
+Trial: 19 - Model: 0.5_0.005	 Mean_reward=-145.77 +/- 16.45
+Trial: 19 - Model: 0.5_0.01	 Mean_reward=-145.87 +/- 17.34
+Trial: 19 - Model: 0.25_0.005	 Mean_reward=-140.72 +/- 15.98
+Trial: 19 - Model: 0.25_0.01	 Mean_reward=-151.77 +/- 27.18
+Trial: 19 - Model: step_100	 Mean_reward=-162.62 +/- 12.77
+Trial: 19 - Model: fixed	 Mean_reward=-148.65 +/- 10.37
+Trial: 29 - Model: 1_0.005	 Mean_reward=-150.45 +/- 12.32
+Trial: 29 - Model: 1_0.01	 Mean_reward=-286.92 +/- 976.92
+Trial: 29 - Model: 0.5_0.005	 Mean_reward=-144.05 +/- 17.81
+Trial: 29 - Model: 0.5_0.01	 Mean_reward=-144.75 +/- 17.38
+Trial: 29 - Model: 0.25_0.005	 Mean_reward=-141.63 +/- 16.15
+Trial: 29 - Model: 0.25_0.01	 Mean_reward=-152.29 +/- 27.07
+Trial: 29 - Model: step_100	 Mean_reward=-164.97 +/- 13.82
+Trial: 29 - Model: fixed	 Mean_reward=-145.78 +/- 13.51
+Trial: 39 - Model: 1_0.005	 Mean_reward=-152.22 +/- 14.29
+Trial: 39 - Model: 1_0.01	 Mean_reward=-190.71 +/- 35.38
+Trial: 39 - Model: 0.5_0.005	 Mean_reward=-144.28 +/- 18.14
+Trial: 39 - Model: 0.5_0.01	 Mean_reward=-147.34 +/- 15.69
+Trial: 39 - Model: 0.25_0.005	 Mean_reward=-144.59 +/- 19.79
+Trial: 39 - Model: 0.25_0.01	 Mean_reward=-155.29 +/- 24.96
+Trial: 39 - Model: step_100	 Mean_reward=-161.67 +/- 10.89
+Trial: 39 - Model: fixed	 Mean_reward=-145.00 +/- 13.61
+Trial: 49 - Model: 1_0.005	 Mean_reward=-151.79 +/- 14.07
+Trial: 49 - Model: 1_0.01	 Mean_reward=-199.95 +/- 39.58
+Trial: 49 - Model: 0.5_0.005	 Mean_reward=-148.52 +/- 14.41
+Trial: 49 - Model: 0.5_0.01	 Mean_reward=-143.25 +/- 18.37
+Trial: 49 - Model: 0.25_0.005	 Mean_reward=-142.30 +/- 14.65
+Trial: 49 - Model: 0.25_0.01	 Mean_reward=-157.27 +/- 27.68
+Trial: 49 - Model: step_100	 Mean_reward=-165.57 +/- 15.50
+Trial: 49 - Model: fixed	 Mean_reward=-143.80 +/- 14.92
+Trial: 59 - Model: 1_0.005	 Mean_reward=-149.83 +/- 12.59
+Trial: 59 - Model: 1_0.01	 Mean_reward=-194.99 +/- 37.18
+Trial: 59 - Model: 0.5_0.005	 Mean_reward=-146.21 +/- 17.11
+Trial: 59 - Model: 0.5_0.01	 Mean_reward=-146.12 +/- 16.26
+Trial: 59 - Model: 0.25_0.005	 Mean_reward=-141.92 +/- 19.15
+Trial: 59 - Model: 0.25_0.01	 Mean_reward=-153.75 +/- 21.78
+Trial: 59 - Model: step_100	 Mean_reward=-162.96 +/- 14.19
+Trial: 59 - Model: fixed	 Mean_reward=-144.68 +/- 15.18
+Trial: 69 - Model: 1_0.005	 Mean_reward=-151.25 +/- 13.79
+Trial: 69 - Model: 1_0.01	 Mean_reward=-188.33 +/- 37.56
+Trial: 69 - Model: 0.5_0.005	 Mean_reward=-143.91 +/- 17.61
+Trial: 69 - Model: 0.5_0.01	 Mean_reward=-147.08 +/- 16.22
+Trial: 69 - Model: 0.25_0.005	 Mean_reward=-142.68 +/- 11.72
+Trial: 69 - Model: 0.25_0.01	 Mean_reward=-155.04 +/- 24.10
+Trial: 69 - Model: step_100	 Mean_reward=-161.16 +/- 14.07
+Trial: 69 - Model: fixed	 Mean_reward=-144.32 +/- 13.94
+Trial: 79 - Model: 1_0.005	 Mean_reward=-152.26 +/- 14.19
+Trial: 79 - Model: 1_0.01	 Mean_reward=-191.70 +/- 35.90
+Trial: 79 - Model: 0.5_0.005	 Mean_reward=-146.76 +/- 16.23
+Trial: 79 - Model: 0.5_0.01	 Mean_reward=-146.01 +/- 16.24
+Trial: 79 - Model: 0.25_0.005	 Mean_reward=-143.07 +/- 14.77
+Trial: 79 - Model: 0.25_0.01	 Mean_reward=-154.91 +/- 25.41
+Trial: 79 - Model: step_100	 Mean_reward=-163.90 +/- 13.26
+Trial: 79 - Model: fixed	 Mean_reward=-143.70 +/- 14.38
+Trial: 89 - Model: 1_0.005	 Mean_reward=-150.34 +/- 13.04
+Trial: 89 - Model: 1_0.01	 Mean_reward=-193.29 +/- 37.74
+Trial: 89 - Model: 0.5_0.005	 Mean_reward=-143.96 +/- 18.56
+Trial: 89 - Model: 0.5_0.01	 Mean_reward=-146.23 +/- 17.12
+Trial: 89 - Model: 0.25_0.005	 Mean_reward=-143.72 +/- 16.22
+Trial: 89 - Model: 0.25_0.01	 Mean_reward=-158.48 +/- 26.20
+Trial: 89 - Model: step_100	 Mean_reward=-164.29 +/- 14.77
+Trial: 89 - Model: fixed	 Mean_reward=-145.21 +/- 14.05
+Trial: 99 - Model: 1_0.005	 Mean_reward=-151.79 +/- 13.39
+Trial: 99 - Model: 1_0.01	 Mean_reward=-187.14 +/- 37.50
+Trial: 99 - Model: 0.5_0.005	 Mean_reward=-243.86 +/- 980.68
+Trial: 99 - Model: 0.5_0.01	 Mean_reward=-148.61 +/- 15.86
+Trial: 99 - Model: 0.25_0.005	 Mean_reward=-142.32 +/- 12.27
+Trial: 99 - Model: 0.25_0.01	 Mean_reward=-153.89 +/- 25.36
+Trial: 99 - Model: step_100	 Mean_reward=-164.83 +/- 15.30
+Trial: 99 - Model: fixed	 Mean_reward=-145.94 +/- 13.32
+
+Average rewards for 1_0.005: -157.93650000000002
+Average rewards for 1_0.01: -204.8447
+Average rewards for 0.5_0.005: -158.71790000000001
+Average rewards for 0.5_0.01: -153.8764
+Average rewards for 0.25_0.005: -150.461
+Average rewards for 0.25_0.01: -168.55870000000002
+Average rewards for step_100: -172.2802
+Average rewards for fixed: -158.1748

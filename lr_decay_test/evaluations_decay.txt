@@ -1,0 +1,78 @@
+ 9 - Model: 1_0.01	 Mean_reward=-641.10 +/- 2147.26
+ 9 - Model: 0.5_0.01	 Mean_reward=-144.29 +/- 15.86
+ 9 - Model: 0.5_0.005	 Mean_reward=-144.15 +/- 13.00
+ 9 - Model: 0.25_0.001	 Mean_reward=-158.08 +/- 24.34
+ 9 - Model: steps_100_500eps	 Mean_reward=-146.93 +/- 11.05
+ 9 - Model: steps_100_500_750eps	 Mean_reward=-149.27 +/- 18.03
+ 9 - Model: fixed	 Mean_reward=-457.54 +/- 1678.29
+ 19 - Model: 1_0.01	 Mean_reward=-487.60 +/- 1685.17
+ 19 - Model: 0.5_0.01	 Mean_reward=-145.05 +/- 15.06
+ 19 - Model: 0.5_0.005	 Mean_reward=-144.78 +/- 12.31
+ 19 - Model: 0.25_0.001	 Mean_reward=-161.94 +/- 31.62
+ 19 - Model: steps_100_500eps	 Mean_reward=-146.75 +/- 11.77
+ 19 - Model: steps_100_500_750eps	 Mean_reward=-150.72 +/- 17.73
+ 19 - Model: fixed	 Mean_reward=-653.29 +/- 2144.37
+ 29 - Model: 1_0.01	 Mean_reward=-506.14 +/- 1702.85
+ 29 - Model: 0.5_0.01	 Mean_reward=-143.99 +/- 15.12
+ 29 - Model: 0.5_0.005	 Mean_reward=-144.60 +/- 13.97
+ 29 - Model: 0.25_0.001	 Mean_reward=-157.96 +/- 24.74
+ 29 - Model: steps_100_500eps	 Mean_reward=-148.79 +/- 15.15
+ 29 - Model: steps_100_500_750eps	 Mean_reward=-154.39 +/- 14.93
+ 29 - Model: fixed	 Mean_reward=-1046.42 +/- 2815.84
+ 39 - Model: 1_0.01	 Mean_reward=-1086.45 +/- 2827.36
+ 39 - Model: 0.5_0.01	 Mean_reward=-344.06 +/- 1379.48
+ 39 - Model: 0.5_0.005	 Mean_reward=-143.89 +/- 14.07
+ 39 - Model: 0.25_0.001	 Mean_reward=-157.90 +/- 30.33
+ 39 - Model: steps_100_500eps	 Mean_reward=-147.48 +/- 11.68
+ 39 - Model: steps_100_500_750eps	 Mean_reward=-149.76 +/- 17.20
+ 39 - Model: fixed	 Mean_reward=-849.68 +/- 2510.49
+ 49 - Model: 1_0.01	 Mean_reward=-420.92 +/- 1420.41
+ 49 - Model: 0.5_0.01	 Mean_reward=-142.02 +/- 15.87
+ 49 - Model: 0.5_0.005	 Mean_reward=-143.23 +/- 13.14
+ 49 - Model: 0.25_0.001	 Mean_reward=-254.79 +/- 979.75
+ 49 - Model: steps_100_500eps	 Mean_reward=-146.60 +/- 11.51
+ 49 - Model: steps_100_500_750eps	 Mean_reward=-150.08 +/- 16.38
+ 49 - Model: fixed	 Mean_reward=-559.11 +/- 1927.21
+ 59 - Model: 1_0.01	 Mean_reward=-897.23 +/- 2546.53
+ 59 - Model: 0.5_0.01	 Mean_reward=-144.74 +/- 14.37
+ 59 - Model: 0.5_0.005	 Mean_reward=-242.26 +/- 980.78
+ 59 - Model: 0.25_0.001	 Mean_reward=-156.53 +/- 22.02
+ 59 - Model: steps_100_500eps	 Mean_reward=-246.38 +/- 980.33
+ 59 - Model: steps_100_500_750eps	 Mean_reward=-148.19 +/- 17.30
+ 59 - Model: fixed	 Mean_reward=-654.59 +/- 2144.09
+ 69 - Model: 1_0.01	 Mean_reward=-962.76 +/- 2669.61
+ 69 - Model: 0.5_0.01	 Mean_reward=-143.36 +/- 16.44
+ 69 - Model: 0.5_0.005	 Mean_reward=-143.51 +/- 13.74
+ 69 - Model: 0.25_0.001	 Mean_reward=-157.59 +/- 28.18
+ 69 - Model: steps_100_500eps	 Mean_reward=-145.35 +/- 10.84
+ 69 - Model: steps_100_500_750eps	 Mean_reward=-150.79 +/- 16.12
+ 69 - Model: fixed	 Mean_reward=-555.06 +/- 1928.05
+ 79 - Model: 1_0.01	 Mean_reward=-582.78 +/- 1951.26
+ 79 - Model: 0.5_0.01	 Mean_reward=-146.84 +/- 13.72
+ 79 - Model: 0.5_0.005	 Mean_reward=-143.10 +/- 13.63
+ 79 - Model: 0.25_0.001	 Mean_reward=-156.99 +/- 27.50
+ 79 - Model: steps_100_500eps	 Mean_reward=-148.48 +/- 12.97
+ 79 - Model: steps_100_500_750eps	 Mean_reward=-151.21 +/- 17.62
+ 79 - Model: fixed	 Mean_reward=-1050.63 +/- 2814.51
+ 89 - Model: 1_0.01	 Mean_reward=-583.13 +/- 1952.08
+ 89 - Model: 0.5_0.01	 Mean_reward=-144.24 +/- 15.89
+ 89 - Model: 0.5_0.005	 Mean_reward=-144.00 +/- 12.63
+ 89 - Model: 0.25_0.001	 Mean_reward=-254.19 +/- 979.79
+ 89 - Model: steps_100_500eps	 Mean_reward=-147.47 +/- 11.41
+ 89 - Model: steps_100_500_750eps	 Mean_reward=-153.54 +/- 16.62
+ 89 - Model: fixed	 Mean_reward=-555.57 +/- 1927.93
+ 99 - Model: 1_0.01	 Mean_reward=-1053.07 +/- 2817.87
+ 99 - Model: 0.5_0.01	 Mean_reward=-144.83 +/- 15.41
+ 99 - Model: 0.5_0.005	 Mean_reward=-142.25 +/- 13.72
+ 99 - Model: 0.25_0.001	 Mean_reward=-162.18 +/- 30.68
+ 99 - Model: steps_100_500eps	 Mean_reward=-146.99 +/- 11.48
+ 99 - Model: steps_100_500_750eps	 Mean_reward=-150.28 +/- 17.46
+ 99 - Model: fixed	 Mean_reward=-558.45 +/- 1927.36
+
+ Average rewards for 1_0.01: -774.0499000000001
+ Average rewards for 0.5_0.01: -152.4048
+ Average rewards for 0.5_0.005: -157.6172
+ Average rewards for 0.25_0.001: -172.0434
+ Average rewards for steps_100_500: nan
+ Average rewards for steps_100_500_750: nan
+ Average rewards for fixed: -682.6285999999999

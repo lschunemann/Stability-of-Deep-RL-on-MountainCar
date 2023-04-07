@@ -10,7 +10,7 @@ max_steps = 10000
 grid_x, grid_v = initialize_grids()
 state_to_qtable = initialize_state_dict()
 
-q = np.loadtxt('data/q_car.txt')
+q = np.loadtxt('data/q_rand_decay.txt')
 
 for step in range(max_steps):
     # Take the action (index) that have the maximum expected future reward given that state

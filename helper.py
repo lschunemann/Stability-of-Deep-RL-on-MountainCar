@@ -53,8 +53,7 @@ def initialize_q_table(state_space, action_space):
 
 
 def epsilon_greedy_policy(q, state, epsilon, grid_x, grid_v, state_to_qtable, env):
-    random_num = random.uniform(0, 1)
-    if random_num > epsilon:
+    if random.uniform(0, 1) > epsilon:
         s = state_to_qtable[get_closest_in_grid(state, grid_x, grid_v)]
         choice = np.argmax(q[s])
     else:
@@ -88,7 +87,7 @@ def train(n_training_episodes, min_epsilon, max_epsilon, decay_rate, env, max_st
         state = env.reset()
         if rand_init:
             state = initialize_random_start(grid_x, grid_v)
-        step = 0
+        steps = 0
         tot_reward, reward = 0, 0
         terminated = False
 
@@ -104,11 +103,11 @@ def train(n_training_episodes, min_epsilon, max_epsilon, decay_rate, env, max_st
             # Update Q table
             q[s][action] = q[s][action] + learning_rate * (reward + gamma * np.max(q[ns]) - q[s][action])
 
-            step += 1
+            steps += 1
 
             # If done, finish the episode
             if terminated:  # or truncated:
-                total_steps.append(step)
+                total_steps.append(steps)
                 break
 
             # Our state is the new state
@@ -167,11 +166,11 @@ def evaluate(env, max_steps, n_eval_episodes, q, grid_x, grid_v, state_to_qtable
 
 def plot_rewards(avg_rewards, title):
     # Plot Rewards
-    plt.plot(np.arange(len(avg_rewards)) + 1, avg_rewards)
+    plt.plot(10 * (np.arange(len(avg_rewards)) + 1), avg_rewards)
     plt.xlabel('Episodes')
     plt.ylabel('Average Reward')
     plt.title(f'Average Reward per Episode - {title}')
-    plt.savefig(f'data/rewards_{title}.png')
+    plt.savefig(f'plots/rewards_{title}.png')
     plt.close()
 
 
@@ -181,5 +180,5 @@ def plot_steps(total_steps, title):
     plt.xlabel('Episode')
     plt.ylabel('Steps')
     plt.title(f'Steps per Episode - {title}')
-    plt.savefig(f'data/steps_{title}.png')
+    plt.savefig(f'plots/steps_{title}.png')
     plt.close()
