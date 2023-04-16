@@ -1,7 +1,7 @@
 import gymnasium as gym
 import numpy as np
 from helper import initialize_grids, initialize_q_table, initialize_state_dict, initialize_random_start, \
-    epsilon_greedy_policy, get_closest_in_grid, plot_rewards, plot_steps
+    epsilon_greedy_policy, get_closest_in_grid, plot_rewards, plot_steps, evaluate
 import matplotlib.pyplot as plt
 import seaborn as sns
 import matplotlib.patches as mpatches
@@ -73,8 +73,8 @@ observation, info = env.reset(seed=42)
 
 # Training parameters
 n_training_episodes = 1000  # Total training episodes
-initial_lr = 0.5  # Learning rate       # old: 1
-k = 0.01  # lr decay                    # old: 0.005
+initial_lr = 1  # Learning rate       # old: 1
+k = 0.005  # lr decay                    # old: 0.005
 min_lr = 0.005
 
 # Evaluation parameters
@@ -94,8 +94,23 @@ decay_rate = 0.005  # Exponential decay rate for exploration prob           # ol
 grid_x, grid_v = initialize_grids()
 state_to_qtable = initialize_state_dict()
 
+# Training
 q_car = initialize_q_table(state_space, action_space)
 q_car, avg_rewards, total_steps = train(q_car)
+
+#  Evaluation
+n_eval_episodes = 200
+trials = 100
+rewards = []
+
+for i in range(trials):
+    mean_reward, std_reward = evaluate(env, max_steps, n_eval_episodes, q_car, grid_x, grid_v,
+                                       state_to_qtable, eval_seed)
+    rewards.append(mean_reward)
+    if (i+1) % 10 == 0:
+        print(f"Trial: {i} - Mean_reward={mean_reward:.2f} +/- {std_reward:.2f}")
+
+print(f'Average reward over 100 trials: {np.mean(rewards)}')
 
 # Plot V values for random init training
 actions = np.max(q_car, axis=1)

@@ -164,6 +164,46 @@ def evaluate(env, max_steps, n_eval_episodes, q, grid_x, grid_v, state_to_qtable
     return mean_reward, std_reward
 
 
+def evaluate_with_steps(env, max_steps, n_eval_episodes, q, grid_x, grid_v, state_to_qtable, seed):
+    """
+    Evaluate the agent for ``n_eval_episodes`` episodes and returns average reward and std of reward.
+    :param env: The evaluation environment
+    :param n_eval_episodes: Number of episode to evaluate the agent
+    :param q: The Q-table
+    :param seed: The evaluation seed array (for taxi-v3)
+    """
+    episode_rewards = []
+    total_steps = []
+    for episode in range(n_eval_episodes):
+        if seed:
+            state = env.reset(seed=seed[episode])
+        else:
+            state = env.reset()
+        steps = 0
+        terminated = False
+        total_rewards_ep = 0
+
+        for step in range(max_steps):
+            # Take the action (index) that have the maximum expected future reward given that state
+            # s = state_to_qtable[get_closest_in_grid(state, grid_x, grid_v)]
+            # action = np.argmax(q[s][:])
+            action = greedy_policy(q, state, grid_x, grid_v, state_to_qtable)
+            new_state, reward, terminated, truncated, info = env.step(action)
+            total_rewards_ep += reward
+
+            if terminated:  # or truncated:
+                break
+            state = new_state
+            steps += 1
+        episode_rewards.append(total_rewards_ep)
+        total_steps.append(steps)
+    mean_reward = np.mean(episode_rewards)
+    std_reward = np.std(episode_rewards)
+    mean_steps = np.mean(total_steps)
+
+    return mean_reward, std_reward, mean_steps
+
+
 def plot_rewards(avg_rewards, title):
     # Plot Rewards
     plt.plot(10 * (np.arange(len(avg_rewards)) + 1), avg_rewards)

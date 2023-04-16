@@ -111,7 +111,7 @@ for init_lr, k_lr in lrs:
         plt.xlabel("Position", fontsize=20)
         plt.ylabel("Velocity", fontsize=20)
         plt.title(f"V scores for optimal action - lr: ({init_lr}, {k_lr})  epsilon: ({eps}, {decay})", fontdict={'fontsize': 25})
-        plt.savefig(f'plots/v_values_lr_{init_lr}:{k_lr}_eps_{eps}:{decay}.png')
+        plt.savefig(f'plots/v_values_lr_{init_lr},{k_lr}_eps_{eps},{decay}.png')
         plt.close()
 
         # Plot Q table heatmap for random init
@@ -127,18 +127,18 @@ for init_lr, k_lr in lrs:
         bound = np.linspace(0, 1, 4)
         labels = ['Move Left', 'Do Nothing', 'Move Right']
         plt.legend([mpatches.Patch(color=cmap(b)) for b in bound[:-1]], [labels[i] for i in range(3)])
-        plt.savefig(f'plots/best_actions_lr_{init_lr}:{k_lr}_eps_{eps}:{decay}.png')
+        plt.savefig(f'plots/best_actions_lr_{init_lr},{k_lr}_eps_{eps},{decay}.png')
         plt.close()
 
         # Plot total steps and average rewards for random init
-        plot_steps(total_steps, f'lr_{init_lr}:{k_lr}_eps_{eps}:{decay}')
-        plot_rewards(avg_rewards, f'lr_{init_lr}:{k_lr}_eps_{eps}:{decay}')
+        plot_steps(total_steps, f'lr_{init_lr},{k_lr}_eps_{eps},{decay}')
+        plot_rewards(avg_rewards, f'lr_{init_lr},{k_lr}_eps_{eps},{decay}')
 
         # Save Q table
-        np.savetxt(f'data/q_lr_{init_lr}:{k_lr}_eps_{eps}:{decay}.txt', q_car)
+        np.savetxt(f'data/q_lr_{init_lr},{k_lr}_eps_{eps},{decay}.txt', q_car)
         np.array(avg_rewards)
-        np.savetxt(f'data/avg_rewards_lr_{init_lr}:{k_lr}_eps_{eps}:{decay}.txt', avg_rewards)
+        np.savetxt(f'data/avg_rewards_lr_{init_lr},{k_lr}_eps_{eps},{decay}.txt', avg_rewards)
         np.array(total_steps)
-        np.savetxt(f'data/total_steps_lr_{init_lr}:{k_lr}_eps_{eps}:{decay}.txt', total_steps)
+        np.savetxt(f'data/total_steps_lr_{init_lr},{k_lr}_eps_{eps},{decay}.txt', total_steps)
 
 env.close()

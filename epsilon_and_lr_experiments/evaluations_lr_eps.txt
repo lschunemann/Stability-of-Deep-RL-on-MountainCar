@@ -1,0 +1,265 @@
+Trial: 9 - Model: q_lr_1,0.01_eps_1,0.005	 Mean_reward=-156.03 +/- 17.96
+Trial: 9 - Model: q_lr_1,0.01_eps_0.5,0.005	 Mean_reward=-459.45 +/- 1678.05
+Trial: 9 - Model: q_lr_1,0.01_eps_0.5,0.01	 Mean_reward=-147.09 +/- 14.46
+Trial: 9 - Model: q_lr_1,0.01_eps_0.25,0.005	 Mean_reward=-1730.26 +/- 3609.33
+Trial: 9 - Model: q_lr_1,0.01_eps_0.25,0.01	 Mean_reward=-2720.79 +/- 4314.78
+Trial: 9 - Model: q_lr_0.5,0.005_eps_1,0.005	 Mean_reward=-152.70 +/- 13.37
+Trial: 9 - Model: q_lr_0.5,0.005_eps_0.5,0.005	 Mean_reward=-261.29 +/- 978.97
+Trial: 9 - Model: q_lr_0.5,0.005_eps_0.5,0.01	 Mean_reward=-153.84 +/- 15.01
+Trial: 9 - Model: q_lr_0.5,0.005_eps_0.25,0.005	 Mean_reward=-2256.70 +/- 3994.85
+Trial: 9 - Model: q_lr_0.5,0.005_eps_0.25,0.01	 Mean_reward=-172.08 +/- 21.84
+Trial: 9 - Model: q_lr_0.5,0.01_eps_1,0.005	 Mean_reward=-162.18 +/- 18.71
+Trial: 9 - Model: q_lr_0.5,0.01_eps_0.5,0.005	 Mean_reward=-141.20 +/- 30.43
+Trial: 9 - Model: q_lr_0.5,0.01_eps_0.5,0.01	 Mean_reward=-236.28 +/- 20.17
+Trial: 9 - Model: q_lr_0.5,0.01_eps_0.25,0.005	 Mean_reward=-3606.14 +/- 4639.90
+Trial: 9 - Model: q_lr_0.5,0.01_eps_0.25,0.01	 Mean_reward=-221.78 +/- 42.59
+Trial: 9 - Model: q_lr_0.25,0.005_eps_1,0.005	 Mean_reward=-783.07 +/- 2328.76
+Trial: 9 - Model: q_lr_0.25,0.005_eps_0.5,0.005	 Mean_reward=-353.12 +/- 1378.35
+Trial: 9 - Model: q_lr_0.25,0.005_eps_0.5,0.01	 Mean_reward=-169.70 +/- 18.97
+Trial: 9 - Model: q_lr_0.25,0.005_eps_0.25,0.005	 Mean_reward=-2402.81 +/- 4011.68
+Trial: 9 - Model: q_lr_0.25,0.005_eps_0.25,0.01	 Mean_reward=-387.99 +/- 1373.59
+Trial: 9 - Model: q_lr_0.25,0.001_eps_1,0.005	 Mean_reward=-639.86 +/- 1948.51
+Trial: 9 - Model: q_lr_0.25,0.001_eps_0.5,0.005	 Mean_reward=-653.77 +/- 1924.66
+Trial: 9 - Model: q_lr_0.25,0.001_eps_0.25,0.005	 Mean_reward=-287.36 +/- 976.41
+Trial: 9 - Model: q_lr_0.25,0.001_eps_0.25,0.01	 Mean_reward=-650.32 +/- 1909.14
+Trial: 19 - Model: q_lr_1,0.01_eps_1,0.005	 Mean_reward=-158.33 +/- 19.44
+Trial: 19 - Model: q_lr_1,0.01_eps_0.5,0.005	 Mean_reward=-655.70 +/- 2143.91
+Trial: 19 - Model: q_lr_1,0.01_eps_0.5,0.01	 Mean_reward=-149.71 +/- 13.10
+Trial: 19 - Model: q_lr_1,0.01_eps_0.25,0.005	 Mean_reward=-1631.08 +/- 3515.75
+Trial: 19 - Model: q_lr_1,0.01_eps_0.25,0.01	 Mean_reward=-3016.59 +/- 4463.15
+Trial: 19 - Model: q_lr_0.5,0.005_eps_1,0.005	 Mean_reward=-153.42 +/- 12.29
+Trial: 19 - Model: q_lr_0.5,0.005_eps_0.5,0.005	 Mean_reward=-167.61 +/- 21.23
+Trial: 19 - Model: q_lr_0.5,0.005_eps_0.5,0.01	 Mean_reward=-253.95 +/- 979.67
+Trial: 19 - Model: q_lr_0.5,0.005_eps_0.25,0.005	 Mean_reward=-1410.92 +/- 3197.46
+Trial: 19 - Model: q_lr_0.5,0.005_eps_0.25,0.01	 Mean_reward=-170.60 +/- 21.50
+Trial: 19 - Model: q_lr_0.5,0.01_eps_1,0.005	 Mean_reward=-163.52 +/- 18.22
+Trial: 19 - Model: q_lr_0.5,0.01_eps_0.5,0.005	 Mean_reward=-141.19 +/- 28.84
+Trial: 19 - Model: q_lr_0.5,0.01_eps_0.5,0.01	 Mean_reward=-232.90 +/- 23.92
+Trial: 19 - Model: q_lr_0.5,0.01_eps_0.25,0.005	 Mean_reward=-2053.18 +/- 3850.99
+Trial: 19 - Model: q_lr_0.5,0.01_eps_0.25,0.01	 Mean_reward=-519.22 +/- 1667.77
+Trial: 19 - Model: q_lr_0.25,0.005_eps_1,0.005	 Mean_reward=-881.96 +/- 2501.67
+Trial: 19 - Model: q_lr_0.25,0.005_eps_0.5,0.005	 Mean_reward=-843.75 +/- 2512.14
+Trial: 19 - Model: q_lr_0.25,0.005_eps_0.5,0.01	 Mean_reward=-170.31 +/- 18.36
+Trial: 19 - Model: q_lr_0.25,0.005_eps_0.25,0.005	 Mean_reward=-2080.65 +/- 3839.73
+Trial: 19 - Model: q_lr_0.25,0.005_eps_0.25,0.01	 Mean_reward=-195.57 +/- 38.34
+Trial: 19 - Model: q_lr_0.25,0.001_eps_1,0.005	 Mean_reward=-1038.56 +/- 2673.14
+Trial: 19 - Model: q_lr_0.25,0.001_eps_0.5,0.005	 Mean_reward=-645.38 +/- 1952.45
+Trial: 19 - Model: q_lr_0.25,0.001_eps_0.25,0.005	 Mean_reward=-185.89 +/- 23.27
+Trial: 19 - Model: q_lr_0.25,0.001_eps_0.25,0.01	 Mean_reward=-799.89 +/- 2161.45
+Trial: 29 - Model: q_lr_1,0.01_eps_1,0.005	 Mean_reward=-254.15 +/- 979.64
+Trial: 29 - Model: q_lr_1,0.01_eps_0.5,0.005	 Mean_reward=-360.30 +/- 1377.38
+Trial: 29 - Model: q_lr_1,0.01_eps_0.5,0.01	 Mean_reward=-148.26 +/- 14.25
+Trial: 29 - Model: q_lr_1,0.01_eps_0.25,0.005	 Mean_reward=-1437.69 +/- 3309.92
+Trial: 29 - Model: q_lr_1,0.01_eps_0.25,0.01	 Mean_reward=-2233.39 +/- 4004.37
+Trial: 29 - Model: q_lr_0.5,0.005_eps_1,0.005	 Mean_reward=-252.61 +/- 979.74
+Trial: 29 - Model: q_lr_0.5,0.005_eps_0.5,0.005	 Mean_reward=-163.23 +/- 19.36
+Trial: 29 - Model: q_lr_0.5,0.005_eps_0.5,0.01	 Mean_reward=-155.43 +/- 13.76
+Trial: 29 - Model: q_lr_0.5,0.005_eps_0.25,0.005	 Mean_reward=-1482.11 +/- 3298.33
+Trial: 29 - Model: q_lr_0.5,0.005_eps_0.25,0.01	 Mean_reward=-174.76 +/- 23.45
+Trial: 29 - Model: q_lr_0.5,0.01_eps_1,0.005	 Mean_reward=-162.56 +/- 19.99
+Trial: 29 - Model: q_lr_0.5,0.01_eps_0.5,0.005	 Mean_reward=-242.37 +/- 981.35
+Trial: 29 - Model: q_lr_0.5,0.01_eps_0.5,0.01	 Mean_reward=-232.45 +/- 23.12
+Trial: 29 - Model: q_lr_0.5,0.01_eps_0.25,0.005	 Mean_reward=-2916.38 +/- 4321.27
+Trial: 29 - Model: q_lr_0.5,0.01_eps_0.25,0.01	 Mean_reward=-215.54 +/- 42.18
+Trial: 29 - Model: q_lr_0.25,0.005_eps_1,0.005	 Mean_reward=-881.06 +/- 2501.92
+Trial: 29 - Model: q_lr_0.25,0.005_eps_0.5,0.005	 Mean_reward=-840.99 +/- 2512.86
+Trial: 29 - Model: q_lr_0.25,0.005_eps_0.5,0.01	 Mean_reward=-171.33 +/- 19.93
+Trial: 29 - Model: q_lr_0.25,0.005_eps_0.25,0.005	 Mean_reward=-1399.25 +/- 3185.31
+Trial: 29 - Model: q_lr_0.25,0.005_eps_0.25,0.01	 Mean_reward=-188.19 +/- 32.10
+Trial: 29 - Model: q_lr_0.25,0.001_eps_1,0.005	 Mean_reward=-874.26 +/- 2504.51
+Trial: 29 - Model: q_lr_0.25,0.001_eps_0.5,0.005	 Mean_reward=-1115.02 +/- 2803.12
+Trial: 29 - Model: q_lr_0.25,0.001_eps_0.25,0.005	 Mean_reward=-188.37 +/- 22.41
+Trial: 29 - Model: q_lr_0.25,0.001_eps_0.25,0.01	 Mean_reward=-1457.58 +/- 3175.47
+Trial: 39 - Model: q_lr_1,0.01_eps_1,0.005	 Mean_reward=-253.26 +/- 979.73
+Trial: 39 - Model: q_lr_1,0.01_eps_0.5,0.005	 Mean_reward=-454.17 +/- 1679.00
+Trial: 39 - Model: q_lr_1,0.01_eps_0.5,0.01	 Mean_reward=-149.06 +/- 13.35
+Trial: 39 - Model: q_lr_1,0.01_eps_0.25,0.005	 Mean_reward=-1239.77 +/- 3079.91
+Trial: 39 - Model: q_lr_1,0.01_eps_0.25,0.01	 Mean_reward=-2719.50 +/- 4315.54
+Trial: 39 - Model: q_lr_0.5,0.005_eps_1,0.005	 Mean_reward=-153.96 +/- 12.68
+Trial: 39 - Model: q_lr_0.5,0.005_eps_0.5,0.005	 Mean_reward=-164.80 +/- 18.51
+Trial: 39 - Model: q_lr_0.5,0.005_eps_0.5,0.01	 Mean_reward=-252.24 +/- 979.87
+Trial: 39 - Model: q_lr_0.5,0.005_eps_0.25,0.005	 Mean_reward=-2277.82 +/- 3986.89
+Trial: 39 - Model: q_lr_0.5,0.005_eps_0.25,0.01	 Mean_reward=-170.17 +/- 20.70
+Trial: 39 - Model: q_lr_0.5,0.01_eps_1,0.005	 Mean_reward=-160.64 +/- 19.10
+Trial: 39 - Model: q_lr_0.5,0.01_eps_0.5,0.005	 Mean_reward=-142.18 +/- 27.20
+Trial: 39 - Model: q_lr_0.5,0.01_eps_0.5,0.01	 Mean_reward=-235.55 +/- 22.25
+Trial: 39 - Model: q_lr_0.5,0.01_eps_0.25,0.005	 Mean_reward=-2434.95 +/- 4127.36
+Trial: 39 - Model: q_lr_0.5,0.01_eps_0.25,0.01	 Mean_reward=-219.00 +/- 42.43
+Trial: 39 - Model: q_lr_0.25,0.005_eps_1,0.005	 Mean_reward=-587.37 +/- 1921.48
+Trial: 39 - Model: q_lr_0.25,0.005_eps_0.5,0.005	 Mean_reward=-841.76 +/- 2512.66
+Trial: 39 - Model: q_lr_0.25,0.005_eps_0.5,0.01	 Mean_reward=-170.35 +/- 19.36
+Trial: 39 - Model: q_lr_0.25,0.005_eps_0.25,0.005	 Mean_reward=-2519.29 +/- 4151.80
+Trial: 39 - Model: q_lr_0.25,0.005_eps_0.25,0.01	 Mean_reward=-187.81 +/- 28.99
+Trial: 39 - Model: q_lr_0.25,0.001_eps_1,0.005	 Mean_reward=-985.98 +/- 2511.24
+Trial: 39 - Model: q_lr_0.25,0.001_eps_0.5,0.005	 Mean_reward=-1144.98 +/- 2797.00
+Trial: 39 - Model: q_lr_0.25,0.001_eps_0.25,0.005	 Mean_reward=-285.26 +/- 976.65
+Trial: 39 - Model: q_lr_0.25,0.001_eps_0.25,0.01	 Mean_reward=-1147.86 +/- 2746.93
+Trial: 49 - Model: q_lr_1,0.01_eps_1,0.005	 Mean_reward=-158.08 +/- 18.99
+Trial: 49 - Model: q_lr_1,0.01_eps_0.5,0.005	 Mean_reward=-555.57 +/- 1928.05
+Trial: 49 - Model: q_lr_1,0.01_eps_0.5,0.01	 Mean_reward=-149.50 +/- 13.51
+Trial: 49 - Model: q_lr_1,0.01_eps_0.25,0.005	 Mean_reward=-1337.63 +/- 3198.96
+Trial: 49 - Model: q_lr_1,0.01_eps_0.25,0.01	 Mean_reward=-2133.72 +/- 3933.19
+Trial: 49 - Model: q_lr_0.5,0.005_eps_1,0.005	 Mean_reward=-253.73 +/- 979.65
+Trial: 49 - Model: q_lr_0.5,0.005_eps_0.5,0.005	 Mean_reward=-164.64 +/- 18.72
+Trial: 49 - Model: q_lr_0.5,0.005_eps_0.5,0.01	 Mean_reward=-252.63 +/- 979.78
+Trial: 49 - Model: q_lr_0.5,0.005_eps_0.25,0.005	 Mean_reward=-2529.47 +/- 4157.57
+Trial: 49 - Model: q_lr_0.5,0.005_eps_0.25,0.01	 Mean_reward=-175.80 +/- 23.92
+Trial: 49 - Model: q_lr_0.5,0.01_eps_1,0.005	 Mean_reward=-158.76 +/- 19.44
+Trial: 49 - Model: q_lr_0.5,0.01_eps_0.5,0.005	 Mean_reward=-335.67 +/- 1380.91
+Trial: 49 - Model: q_lr_0.5,0.01_eps_0.5,0.01	 Mean_reward=-235.99 +/- 21.14
+Trial: 49 - Model: q_lr_0.5,0.01_eps_0.25,0.005	 Mean_reward=-2723.31 +/- 4206.74
+Trial: 49 - Model: q_lr_0.5,0.01_eps_0.25,0.01	 Mean_reward=-215.62 +/- 43.24
+Trial: 49 - Model: q_lr_0.25,0.005_eps_1,0.005	 Mean_reward=-781.51 +/- 2329.12
+Trial: 49 - Model: q_lr_0.25,0.005_eps_0.5,0.005	 Mean_reward=-742.07 +/- 2339.11
+Trial: 49 - Model: q_lr_0.25,0.005_eps_0.5,0.01	 Mean_reward=-171.63 +/- 18.56
+Trial: 49 - Model: q_lr_0.25,0.005_eps_0.25,0.005	 Mean_reward=-2065.94 +/- 3846.41
+Trial: 49 - Model: q_lr_0.25,0.005_eps_0.25,0.01	 Mean_reward=-191.72 +/- 33.73
+Trial: 49 - Model: q_lr_0.25,0.001_eps_1,0.005	 Mean_reward=-903.13 +/- 2513.17
+Trial: 49 - Model: q_lr_0.25,0.001_eps_0.5,0.005	 Mean_reward=-816.01 +/- 2202.55
+Trial: 49 - Model: q_lr_0.25,0.001_eps_0.25,0.005	 Mean_reward=-188.68 +/- 22.52
+Trial: 49 - Model: q_lr_0.25,0.001_eps_0.25,0.01	 Mean_reward=-1209.71 +/- 2828.94
+Trial: 59 - Model: q_lr_1,0.01_eps_1,0.005	 Mean_reward=-162.03 +/- 20.88
+Trial: 59 - Model: q_lr_1,0.01_eps_0.5,0.005	 Mean_reward=-847.49 +/- 2511.13
+Trial: 59 - Model: q_lr_1,0.01_eps_0.5,0.01	 Mean_reward=-148.58 +/- 15.18
+Trial: 59 - Model: q_lr_1,0.01_eps_0.25,0.005	 Mean_reward=-1533.08 +/- 3416.29
+Trial: 59 - Model: q_lr_1,0.01_eps_0.25,0.01	 Mean_reward=-2722.26 +/- 4313.92
+Trial: 59 - Model: q_lr_0.5,0.005_eps_1,0.005	 Mean_reward=-152.73 +/- 12.01
+Trial: 59 - Model: q_lr_0.5,0.005_eps_0.5,0.005	 Mean_reward=-165.95 +/- 20.60
+Trial: 59 - Model: q_lr_0.5,0.005_eps_0.5,0.01	 Mean_reward=-153.62 +/- 16.26
+Trial: 59 - Model: q_lr_0.5,0.005_eps_0.25,0.005	 Mean_reward=-2065.58 +/- 3847.60
+Trial: 59 - Model: q_lr_0.5,0.005_eps_0.25,0.01	 Mean_reward=-171.47 +/- 22.37
+Trial: 59 - Model: q_lr_0.5,0.01_eps_1,0.005	 Mean_reward=-165.23 +/- 16.95
+Trial: 59 - Model: q_lr_0.5,0.01_eps_0.5,0.005	 Mean_reward=-245.14 +/- 980.99
+Trial: 59 - Model: q_lr_0.5,0.01_eps_0.5,0.01	 Mean_reward=-332.33 +/- 971.86
+Trial: 59 - Model: q_lr_0.5,0.01_eps_0.25,0.005	 Mean_reward=-3107.18 +/- 4422.03
+Trial: 59 - Model: q_lr_0.5,0.01_eps_0.25,0.01	 Mean_reward=-319.41 +/- 973.67
+Trial: 59 - Model: q_lr_0.25,0.005_eps_1,0.005	 Mean_reward=-979.27 +/- 2660.17
+Trial: 59 - Model: q_lr_0.25,0.005_eps_0.5,0.005	 Mean_reward=-451.34 +/- 1679.43
+Trial: 59 - Model: q_lr_0.25,0.005_eps_0.5,0.01	 Mean_reward=-171.45 +/- 17.59
+Trial: 59 - Model: q_lr_0.25,0.005_eps_0.25,0.005	 Mean_reward=-2290.94 +/- 3989.90
+Trial: 59 - Model: q_lr_0.25,0.005_eps_0.25,0.01	 Mean_reward=-292.47 +/- 976.35
+Trial: 59 - Model: q_lr_0.25,0.001_eps_1,0.005	 Mean_reward=-1350.28 +/- 3062.69
+Trial: 59 - Model: q_lr_0.25,0.001_eps_0.5,0.005	 Mean_reward=-442.39 +/- 1242.47
+Trial: 59 - Model: q_lr_0.25,0.001_eps_0.25,0.005	 Mean_reward=-483.85 +/- 1673.68
+Trial: 59 - Model: q_lr_0.25,0.001_eps_0.25,0.01	 Mean_reward=-1056.92 +/- 2642.21
+Trial: 69 - Model: q_lr_1,0.01_eps_1,0.005	 Mean_reward=-153.92 +/- 14.89
+Trial: 69 - Model: q_lr_1,0.01_eps_0.5,0.005	 Mean_reward=-361.51 +/- 1377.19
+Trial: 69 - Model: q_lr_1,0.01_eps_0.5,0.01	 Mean_reward=-148.98 +/- 14.31
+Trial: 69 - Model: q_lr_1,0.01_eps_0.25,0.005	 Mean_reward=-1731.93 +/- 3608.58
+Trial: 69 - Model: q_lr_1,0.01_eps_0.25,0.01	 Mean_reward=-3414.00 +/- 4622.16
+Trial: 69 - Model: q_lr_0.5,0.005_eps_1,0.005	 Mean_reward=-155.48 +/- 15.53
+Trial: 69 - Model: q_lr_0.5,0.005_eps_0.5,0.005	 Mean_reward=-167.29 +/- 25.43
+Trial: 69 - Model: q_lr_0.5,0.005_eps_0.5,0.01	 Mean_reward=-153.55 +/- 16.46
+Trial: 69 - Model: q_lr_0.5,0.005_eps_0.25,0.005	 Mean_reward=-2175.36 +/- 3918.52
+Trial: 69 - Model: q_lr_0.5,0.005_eps_0.25,0.01	 Mean_reward=-172.48 +/- 22.47
+Trial: 69 - Model: q_lr_0.5,0.01_eps_1,0.005	 Mean_reward=-158.44 +/- 19.96
+Trial: 69 - Model: q_lr_0.5,0.01_eps_0.5,0.005	 Mean_reward=-241.55 +/- 981.18
+Trial: 69 - Model: q_lr_0.5,0.01_eps_0.5,0.01	 Mean_reward=-234.49 +/- 21.78
+Trial: 69 - Model: q_lr_0.5,0.01_eps_0.25,0.005	 Mean_reward=-2749.86 +/- 4301.38
+Trial: 69 - Model: q_lr_0.5,0.01_eps_0.25,0.01	 Mean_reward=-318.98 +/- 973.79
+Trial: 69 - Model: q_lr_0.25,0.005_eps_1,0.005	 Mean_reward=-980.16 +/- 2659.89
+Trial: 69 - Model: q_lr_0.25,0.005_eps_0.5,0.005	 Mean_reward=-845.19 +/- 2511.74
+Trial: 69 - Model: q_lr_0.25,0.005_eps_0.5,0.01	 Mean_reward=-171.23 +/- 19.25
+Trial: 69 - Model: q_lr_0.25,0.005_eps_0.25,0.005	 Mean_reward=-2482.15 +/- 4118.42
+Trial: 69 - Model: q_lr_0.25,0.005_eps_0.25,0.01	 Mean_reward=-200.47 +/- 43.49
+Trial: 69 - Model: q_lr_0.25,0.001_eps_1,0.005	 Mean_reward=-1603.78 +/- 3399.44
+Trial: 69 - Model: q_lr_0.25,0.001_eps_0.5,0.005	 Mean_reward=-1038.67 +/- 2654.41
+Trial: 69 - Model: q_lr_0.25,0.001_eps_0.25,0.005	 Mean_reward=-187.47 +/- 22.84
+Trial: 69 - Model: q_lr_0.25,0.001_eps_0.25,0.01	 Mean_reward=-643.83 +/- 1910.48
+Trial: 79 - Model: q_lr_1,0.01_eps_1,0.005	 Mean_reward=-158.64 +/- 18.21
+Trial: 79 - Model: q_lr_1,0.01_eps_0.5,0.005	 Mean_reward=-1248.76 +/- 3076.72
+Trial: 79 - Model: q_lr_1,0.01_eps_0.5,0.01	 Mean_reward=-147.90 +/- 14.32
+Trial: 79 - Model: q_lr_1,0.01_eps_0.25,0.005	 Mean_reward=-1338.36 +/- 3198.65
+Trial: 79 - Model: q_lr_1,0.01_eps_0.25,0.01	 Mean_reward=-3114.51 +/- 4507.64
+Trial: 79 - Model: q_lr_0.5,0.005_eps_1,0.005	 Mean_reward=-152.66 +/- 10.75
+Trial: 79 - Model: q_lr_0.5,0.005_eps_0.5,0.005	 Mean_reward=-164.87 +/- 19.68
+Trial: 79 - Model: q_lr_0.5,0.005_eps_0.5,0.01	 Mean_reward=-152.90 +/- 14.25
+Trial: 79 - Model: q_lr_0.5,0.005_eps_0.25,0.005	 Mean_reward=-1464.26 +/- 3301.12
+Trial: 79 - Model: q_lr_0.5,0.005_eps_0.25,0.01	 Mean_reward=-168.04 +/- 18.98
+Trial: 79 - Model: q_lr_0.5,0.01_eps_1,0.005	 Mean_reward=-162.58 +/- 18.73
+Trial: 79 - Model: q_lr_0.5,0.01_eps_0.5,0.005	 Mean_reward=-139.69 +/- 34.34
+Trial: 79 - Model: q_lr_0.5,0.01_eps_0.5,0.01	 Mean_reward=-234.47 +/- 22.91
+Trial: 79 - Model: q_lr_0.5,0.01_eps_0.25,0.005	 Mean_reward=-2579.78 +/- 4184.42
+Trial: 79 - Model: q_lr_0.5,0.01_eps_0.25,0.01	 Mean_reward=-220.27 +/- 41.38
+Trial: 79 - Model: q_lr_0.25,0.005_eps_1,0.005	 Mean_reward=-389.29 +/- 1373.19
+Trial: 79 - Model: q_lr_0.25,0.005_eps_0.5,0.005	 Mean_reward=-843.53 +/- 2512.20
+Trial: 79 - Model: q_lr_0.25,0.005_eps_0.5,0.01	 Mean_reward=-169.03 +/- 21.28
+Trial: 79 - Model: q_lr_0.25,0.005_eps_0.25,0.005	 Mean_reward=-2154.11 +/- 3832.80
+Trial: 79 - Model: q_lr_0.25,0.005_eps_0.25,0.01	 Mean_reward=-188.49 +/- 31.87
+Trial: 79 - Model: q_lr_0.25,0.001_eps_1,0.005	 Mean_reward=-1313.13 +/- 3081.11
+Trial: 79 - Model: q_lr_0.25,0.001_eps_0.5,0.005	 Mean_reward=-712.37 +/- 2132.14
+Trial: 79 - Model: q_lr_0.25,0.001_eps_0.25,0.005	 Mean_reward=-187.37 +/- 22.52
+Trial: 79 - Model: q_lr_0.25,0.001_eps_0.25,0.01	 Mean_reward=-1229.36 +/- 2924.47
+Trial: 89 - Model: q_lr_1,0.01_eps_1,0.005	 Mean_reward=-153.65 +/- 15.85
+Trial: 89 - Model: q_lr_1,0.01_eps_0.5,0.005	 Mean_reward=-554.10 +/- 1928.33
+Trial: 89 - Model: q_lr_1,0.01_eps_0.5,0.01	 Mean_reward=-149.55 +/- 13.54
+Trial: 89 - Model: q_lr_1,0.01_eps_0.25,0.005	 Mean_reward=-2418.98 +/- 4143.36
+Trial: 89 - Model: q_lr_1,0.01_eps_0.25,0.01	 Mean_reward=-2620.28 +/- 4260.72
+Trial: 89 - Model: q_lr_0.5,0.005_eps_1,0.005	 Mean_reward=-252.76 +/- 979.74
+Trial: 89 - Model: q_lr_0.5,0.005_eps_0.5,0.005	 Mean_reward=-166.65 +/- 20.51
+Trial: 89 - Model: q_lr_0.5,0.005_eps_0.5,0.01	 Mean_reward=-155.37 +/- 16.82
+Trial: 89 - Model: q_lr_0.5,0.005_eps_0.25,0.005	 Mean_reward=-1952.12 +/- 3772.66
+Trial: 89 - Model: q_lr_0.5,0.005_eps_0.25,0.01	 Mean_reward=-174.69 +/- 23.62
+Trial: 89 - Model: q_lr_0.5,0.01_eps_1,0.005	 Mean_reward=-158.49 +/- 18.67
+Trial: 89 - Model: q_lr_0.5,0.01_eps_0.5,0.005	 Mean_reward=-444.07 +/- 1680.77
+Trial: 89 - Model: q_lr_0.5,0.01_eps_0.5,0.01	 Mean_reward=-232.16 +/- 22.66
+Trial: 89 - Model: q_lr_0.5,0.01_eps_0.25,0.005	 Mean_reward=-2941.33 +/- 4405.72
+Trial: 89 - Model: q_lr_0.5,0.01_eps_0.25,0.01	 Mean_reward=-223.43 +/- 41.71
+Trial: 89 - Model: q_lr_0.25,0.005_eps_1,0.005	 Mean_reward=-394.38 +/- 1372.54
+Trial: 89 - Model: q_lr_0.25,0.005_eps_0.5,0.005	 Mean_reward=-545.94 +/- 1929.94
+Trial: 89 - Model: q_lr_0.25,0.005_eps_0.5,0.01	 Mean_reward=-172.46 +/- 18.47
+Trial: 89 - Model: q_lr_0.25,0.005_eps_0.25,0.005	 Mean_reward=-1546.37 +/- 3319.00
+Trial: 89 - Model: q_lr_0.25,0.005_eps_0.25,0.01	 Mean_reward=-290.83 +/- 976.47
+Trial: 89 - Model: q_lr_0.25,0.001_eps_1,0.005	 Mean_reward=-913.77 +/- 2498.81
+Trial: 89 - Model: q_lr_0.25,0.001_eps_0.5,0.005	 Mean_reward=-1106.37 +/- 2799.80
+Trial: 89 - Model: q_lr_0.25,0.001_eps_0.25,0.005	 Mean_reward=-291.28 +/- 975.99
+Trial: 89 - Model: q_lr_0.25,0.001_eps_0.25,0.01	 Mean_reward=-794.53 +/- 2153.14
+Trial: 99 - Model: q_lr_1,0.01_eps_1,0.005	 Mean_reward=-157.25 +/- 18.78
+Trial: 99 - Model: q_lr_1,0.01_eps_0.5,0.005	 Mean_reward=-362.23 +/- 1377.06
+Trial: 99 - Model: q_lr_1,0.01_eps_0.5,0.01	 Mean_reward=-245.08 +/- 980.53
+Trial: 99 - Model: q_lr_1,0.01_eps_0.25,0.005	 Mean_reward=-1532.26 +/- 3416.67
+Trial: 99 - Model: q_lr_1,0.01_eps_0.25,0.01	 Mean_reward=-2822.38 +/- 4365.21
+Trial: 99 - Model: q_lr_0.5,0.005_eps_1,0.005	 Mean_reward=-152.66 +/- 13.12
+Trial: 99 - Model: q_lr_0.5,0.005_eps_0.5,0.005	 Mean_reward=-164.42 +/- 21.87
+Trial: 99 - Model: q_lr_0.5,0.005_eps_0.5,0.01	 Mean_reward=-153.07 +/- 17.75
+Trial: 99 - Model: q_lr_0.5,0.005_eps_0.25,0.005	 Mean_reward=-2245.30 +/- 3998.46
+Trial: 99 - Model: q_lr_0.5,0.005_eps_0.25,0.01	 Mean_reward=-169.16 +/- 19.64
+Trial: 99 - Model: q_lr_0.5,0.01_eps_1,0.005	 Mean_reward=-161.43 +/- 18.97
+Trial: 99 - Model: q_lr_0.5,0.01_eps_0.5,0.005	 Mean_reward=-239.21 +/- 981.61
+Trial: 99 - Model: q_lr_0.5,0.01_eps_0.5,0.01	 Mean_reward=-233.84 +/- 23.59
+Trial: 99 - Model: q_lr_0.5,0.01_eps_0.25,0.005	 Mean_reward=-2923.94 +/- 4412.82
+Trial: 99 - Model: q_lr_0.5,0.01_eps_0.25,0.01	 Mean_reward=-315.78 +/- 974.26
+Trial: 99 - Model: q_lr_0.25,0.005_eps_1,0.005	 Mean_reward=-685.64 +/- 2136.98
+Trial: 99 - Model: q_lr_0.25,0.005_eps_0.5,0.005	 Mean_reward=-646.48 +/- 2145.98
+Trial: 99 - Model: q_lr_0.25,0.005_eps_0.5,0.01	 Mean_reward=-170.35 +/- 20.22
+Trial: 99 - Model: q_lr_0.25,0.005_eps_0.25,0.005	 Mean_reward=-2589.80 +/- 4175.84
+Trial: 99 - Model: q_lr_0.25,0.005_eps_0.25,0.01	 Mean_reward=-191.34 +/- 35.16
+Trial: 99 - Model: q_lr_0.25,0.001_eps_1,0.005	 Mean_reward=-947.30 +/- 2499.82
+Trial: 99 - Model: q_lr_0.25,0.001_eps_0.5,0.005	 Mean_reward=-798.81 +/- 2324.82
+Trial: 99 - Model: q_lr_0.25,0.001_eps_0.25,0.005	 Mean_reward=-190.08 +/- 22.24
+Trial: 99 - Model: q_lr_0.25,0.001_eps_0.25,0.01	 Mean_reward=-789.34 +/- 2128.87
+
+Average rewards for lr:1,0.01_eps:1,0.005: -164.52579999999998
+Average rewards for lr:1,0.01_eps:0.5,0.005: -686.3802000000001
+Average rewards for lr:1,0.01_eps:0.5,0.01: -158.0207
+Average rewards for lr:1,0.01_eps:0.25,0.005: -1648.4610000000002
+Average rewards for lr:1,0.01_eps:0.25,0.01: -2622.5534000000002
+Average rewards for lr:0.5,0.005_eps:1,0.005: -169.48500000000004
+Average rewards for lr:0.5,0.005_eps:0.5,0.005: -180.55169999999998
+Average rewards for lr:0.5,0.005_eps:0.5,0.01: -171.39340000000004
+Average rewards for lr:0.5,0.005_eps:0.25,0.005: -1932.6247
+Average rewards for lr:0.5,0.005_eps:0.25,0.01: -178.5806
+Average rewards for lr:0.5,0.01_eps:1,0.005: -165.99970000000002
+Average rewards for lr:0.5,0.01_eps:0.5,0.005: -239.76230000000004
+Average rewards for lr:0.5,0.01_eps:0.5,0.01: -238.78319999999997
+Average rewards for lr:0.5,0.01_eps:0.25,0.005: -2519.9126999999994
+Average rewards for lr:0.5,0.01_eps:0.25,0.01: -272.6783
+Average rewards for lr:0.25,0.005_eps:1,0.005: -733.98
+Average rewards for lr:0.25,0.005_eps:0.5,0.005: -702.2738999999997
+Average rewards for lr:0.25,0.005_eps:0.5,0.01: -174.48180000000005
+Average rewards for lr:0.25,0.005_eps:0.25,0.005: -1959.7321
+Average rewards for lr:0.25,0.005_eps:0.25,0.01: -247.12639999999996
+Average rewards for lr:0.25,0.001_eps:1,0.005: -888.2467
+Average rewards for lr:0.25,0.001_eps:0.5,0.005: -871.2286000000001
+Average rewards for lr:0.25,0.001_eps:0.25,0.005: -243.93169999999998
+Average rewards for lr:0.25,0.001_eps:0.25,0.01: -988.6165
