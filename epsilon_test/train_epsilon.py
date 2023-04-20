@@ -1,6 +1,6 @@
 import gymnasium as gym
 import numpy as np
-from helper import initialize_grids, initialize_q_table, initialize_state_dict, initialize_random_start, \
+from standard.helper import initialize_grids, initialize_q_table, initialize_state_dict, initialize_random_start, \
     epsilon_greedy_policy, get_closest_in_grid, plot_rewards, plot_steps
 import matplotlib.pyplot as plt
 import seaborn as sns

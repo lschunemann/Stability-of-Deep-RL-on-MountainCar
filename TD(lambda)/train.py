@@ -63,26 +63,27 @@ for i, learning_rate in enumerate(learning_rates):
         steps_list = train(env, w, epsilon, numtilings, actions, hashtable, num_training_episodes, gamma, lmbda,
                            x_bound, v_bound, learning_rate, True)
 
+        np.savetxt(f'data/steps_lr_{learning_rate},lambda_{lmbda}', steps_list)
         # Evaluate
-        total_steps = 0
-
-        for k in range(eval_runs):
-            steps_list_eval = evaluate(env, w, hashtable, numtilings, actions, x_bound, v_bound, num_eval_episodes, True)
-            total_steps += np.sum(steps_list_eval)
-            if (k+1) % 10 == 0:
-                print(f'Average number of steps at {np.average(steps_list_eval)}')
+        # total_steps = 0
+        #
+        # for k in range(eval_runs):
+        #     steps_list_eval = evaluate(env, w, hashtable, numtilings, actions, x_bound, v_bound, num_eval_episodes, True)
+        #     total_steps += np.sum(steps_list_eval)
+        #     if (k+1) % 10 == 0:
+        #         print(f'Average number of steps at {np.average(steps_list_eval)}')
 
         # print(f'Average number of steps: {total_steps / (eval_runs * num_eval_episodes)}')
 
         # Plot
         axs[i, j].plot(np.arange(len(steps_list)) + 1, steps_list)
-        axs[i, j].title(f'Average evaluation steps: {np.average(steps_list_eval)}')
+        # axs[i, j].title(f'Average evaluation steps: {np.average(steps_list_eval)}')
         axs[i, j].get_xaxis().set_visible(False)
         axs[i, j].get_yaxis().set_visible(False)
 
 
-# fig.supxlabel('Learning rates\n0.001, 0.005, 0.01, 0.1, 0.2, 0.35, 0.5, 0.75, 1, 2', fontsize=font_x_y)
-# fig.supylabel('Gamma\n0, 0.1, 0.25, 0.5, 0.75, 0.85, 0.9, 0.95, 0.99, 1', fontsize=font_x_y)
+fig.supxlabel('Learning rates: 0.1, 0.2, 0.3, 0.4, 0.5', fontsize=font_x_y)
+fig.supylabel('Lambda: 0.2, 0.4, 0.5, 0.7, 0.9', fontsize=font_x_y)
 fig.suptitle('Total steps needed per Episode based on different values for lambda and lr', fontsize=font_title)
 plt.savefig('plots/total_steps_5x5.png')
 plt.close()

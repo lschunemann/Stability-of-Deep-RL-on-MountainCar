@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import matplotlib.patches as mpatches
-from helper import initialize_grids, initialize_q_table, initialize_state_dict, train, plot_rewards, plot_steps
+from standard.helper import initialize_grids, initialize_q_table, initialize_state_dict, train, plot_rewards, plot_steps
 
 
 env = gym.make("MountainCar-v0")
