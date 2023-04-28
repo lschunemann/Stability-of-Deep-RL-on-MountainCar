@@ -96,9 +96,17 @@ class TrainMountainCar:
         rewards_list = []
         for episode in range(self.eval_episodes):
             env.reset()
+
+            # min 4 and up to 30 no-op actions (at least 4 to have stacked input to start training on)
+            noop = random.randint(0, 26)
+            for i in range(noop):
+                action = env.action_space.sample()
+                env.step(action)
+
             stacked_images, _, _ = self.prepare_images(env, env.action_space.sample())
             X = torch.stack(stacked_images)
             rewards = 0
+            
             for i in range(self.max_steps):      # max episode length 10000
                 action = self.epsilon_greedy_policy(policy, X, self.eval_epsilon, env)
                 stacked_images, reward, terminated = self.prepare_images(env, action)
@@ -306,23 +314,5 @@ class TrainMountainCar:
                         #     else:
                         #         torch.save(policy.state_dict(), f'data/DQN_paper_fixed_{total_steps}.pth')
 
-        # save network weights of the best policy and array of steps per episode for analysis
-        if self.prioritized:
-            torch.save(best_policy, 'data/DDQN_prioritized.pth')
-            np.savetxt(f'data/steps_ddqn_prioritized.txt', total_steps_list)
-            np.savetxt(f'data/q_values_ddqn_prioritized.txt', q_measures)
-        elif self.double:
-            torch.save(best_policy, 'data/DDQN.pth')
-            np.savetxt(f'data/steps_ddqn.txt', total_steps_list)
-            np.savetxt(f'data/q_values_ddqn.txt', q_measures)
-        elif self.fixed_target:
-            torch.save(best_policy, 'data/DQN_paper_fixed_final.pth')
-            np.savetxt(f'data/steps_fixed.txt', total_steps_list)
-            np.savetxt(f'data/q_values_fixed.txt', q_measures)
-        else:
-            torch.save(best_policy, 'data/DQN_paper_final.pth')
-            np.savetxt(f'data/steps.txt', total_steps_list)
-            np.savetxt(f'data/q_values.txt', q_measures)
-
-        return total_rewards, total_steps_list, q_measures
+        return total_rewards, total_steps_list, q_measures, best_policy
 

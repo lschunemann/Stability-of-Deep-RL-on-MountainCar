@@ -33,8 +33,14 @@ car = TrainMountainCar(n_training_episodes=n_training_episodes, gamma=gamma, lea
                        max_steps=max_training_steps, batch_size=batch_size, fixed_target=fixed_target,
                        copy_target=copy_target, double=double, debug=debug)
 
-total_rewards, total_steps_list, q_measures = car.train()
+total_rewards, total_steps_list, q_measures, best_policy = car.train()
 
+# save best policy as well as steps and q measures
+torch.save(best_policy, 'data/DQN_paper_fixed_final.pth')
+np.savetxt(f'data/steps_fixed.txt', total_steps_list)
+np.savetxt(f'data/q_values_fixed.txt', q_measures)
+
+# Plot steps per episode
 plt.plot(np.arange(len(total_steps_list)) + 1, total_steps_list)
 plt.xlabel('Episode')
 plt.ylabel('Steps')
@@ -42,6 +48,7 @@ plt.title('Steps per Episode - DQN_fixed')
 plt.savefig('plots/steps_DQN_fixed.png')
 plt.close()
 
+# Plot q measures per episode
 plt.plot(np.arange(len(q_measures)) + 1, q_measures)
 plt.xlabel('Episode')
 plt.ylabel('Average Q')
