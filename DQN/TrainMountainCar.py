@@ -16,7 +16,7 @@ class TrainMountainCar:
     def __init__(self, n_training_episodes=200, gamma=0.99, learning_rate=0.1, epsilon_max=0.5,
                  epsilon_min=0.05, decay_rate=0.005, max_steps=10000, batch_size=32, fixed_target=False,
                  copy_target=10000, replay_size=100000, double=False, dueling=False, prioritized=False, debug=False,
-                 eval_epsilon=0.05, eval_episodes=50, eval_every=50):
+                 eval_epsilon=0.05, eval_episodes=25, eval_every=50):
         self.n_training_episodes = n_training_episodes
         self.gamma = gamma
         self.learning_rate = learning_rate
@@ -106,7 +106,7 @@ class TrainMountainCar:
             stacked_images, _, _ = self.prepare_images(env, env.action_space.sample())
             X = torch.stack(stacked_images)
             rewards = 0
-            
+
             for i in range(self.max_steps):      # max episode length 10000
                 action = self.epsilon_greedy_policy(policy, X, self.eval_epsilon, env)
                 stacked_images, reward, terminated = self.prepare_images(env, action)
@@ -135,7 +135,7 @@ class TrainMountainCar:
         total_rewards = []
         total_steps_list = []
 
-        # initialize stated in which Q value is measured every X episodes to track progress
+        # initialize states in which Q value is measured every X episodes to track progress
         measuring_states = self.initialize_measuring_states(env)
         q_measures = []
 
@@ -162,7 +162,7 @@ class TrainMountainCar:
         best_reward = - float('inf')
         best_policy = policy.state_dict()
 
-        optimizer = torch.optim.RMSprop(policy.parameters(), weight_decay=0.99, momentum=0.95)      # remove momentum??
+        optimizer = torch.optim.RMSprop(policy.parameters(), lr=self.learning_rate, weight_decay=0.99, momentum=0.95)      # remove momentum??
 
         for episode in range(self.n_training_episodes):
             steps = 0
@@ -187,7 +187,7 @@ class TrainMountainCar:
             while True:
                 # epsilon decay based on steps
                 # epsilon = self.epsilon_min + (self.epsilon_max - self.epsilon_min) * np.exp(-self.decay_rate * total_steps)
-                epsilon = max(self.epsilon_max - ((self.epsilon_max - self.epsilon_min)/250000) * total_steps, self.epsilon_min)      # linear decay
+                epsilon = max(self.epsilon_max - ((self.epsilon_max - self.epsilon_min)/500000) * total_steps, self.epsilon_min)      # linear decay
                 # epsilon decay based on episodes
                 # epsilon = self.epsilon_min + (self.epsilon_max - self.epsilon_min) * np.exp(-decay_rate * 100 * total_steps)
 
@@ -245,6 +245,7 @@ class TrainMountainCar:
                     else:
                         act = a
                     state_action_values = policy(states).gather(1, act.type(torch.int64))
+                    # print(torch.mean(policy(states).max(1)[0]).item())
                     # target = r + self.gamma * np.argmax(values(x_new))
                     # update network
                     next_state_values = torch.zeros(self.batch_size, device=device)
@@ -252,8 +253,10 @@ class TrainMountainCar:
                         next_state_values[mask] = target(next_states[mask]).max(1)[0].detach()
                     else:
                         next_state_values[mask] = policy(next_states[mask]).max(1)[0].detach()
+                    # print(torch.mean(target(next_states[mask]).max(1)[0]).item())
                     # Compute the expected Q values
                     expected_state_action_values = (next_state_values * self.gamma) + r.squeeze(1)
+                    # print(torch.mean(expected_state_action_values).item())
 
                     if self.prioritized:
                         diff = expected_state_action_values.unsqueeze(1) - state_action_values
@@ -263,6 +266,7 @@ class TrainMountainCar:
                                                   expected_state_action_values.unsqueeze(1)).squeeze() * info['_weight']
                     else:
                         loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
+                        # loss = torch.nn.MSELoss()(state_action_values, expected_state_action_values.unsqueeze(1)).squeeze()
                     # Optimize the model
                     optimizer.zero_grad()
                     loss.backward()

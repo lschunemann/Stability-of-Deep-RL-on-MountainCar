@@ -125,7 +125,7 @@ class DQN_dueling(nn.Module):
         adv = self.advantage(x)
         adv = nn.ReLU()(adv)
         adv = self.advantage_out(adv)
-        x = Combine(val, adv)
+        x = Combine()(val, adv)
         return x
 
 
