@@ -14,7 +14,6 @@ max_training_steps = 10000
 # Exploration parameters
 epsilon_max = 1
 epsilon_min = 0.01
-decay_rate = 0.00001
 
 # replay memory parameters
 replay_size = 100000
@@ -31,11 +30,11 @@ double = True       # DDQN
 dueling = True      # Dueling Network
 
 car = TrainMountainCar(n_training_episodes=n_training_episodes, gamma=gamma, learning_rate=learning_rate,
-                       epsilon_max=epsilon_max, epsilon_min=epsilon_min, decay_rate=decay_rate,
+                       epsilon_max=epsilon_max, epsilon_min=epsilon_min,
                        max_steps=max_training_steps, batch_size=batch_size, fixed_target=fixed_target,
                        copy_target=copy_target, replay_size=replay_size, double=double, dueling=dueling, debug=debug)
 
-total_rewards, total_steps_list, q_measures, best_policy = car.train()
+total_rewards, total_steps_list, q_measures, best_policy, evaluations = car.train()
 
 torch.save(best_policy, 'data/Dueling_DDQN.pth')
 np.savetxt(f'data/steps_Dueling_DDQN.txt', total_steps_list)

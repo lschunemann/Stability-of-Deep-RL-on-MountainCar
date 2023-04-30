@@ -126,9 +126,9 @@ ax = sns.heatmap(actions, annot=True)
 plt.ylim(0, 20)
 plt.xlabel("Position", fontsize=20)
 plt.ylabel("Velocity", fontsize=20)
-plt.title("V scores for optimal action - random init w/ lr decay", fontdict={'fontsize': 25})
+plt.title("Q values for optimal action - random init w/ lr decay", fontdict={'fontsize': 25})
 # plt.savefig('plots/v_values_rand_decay')
-with open('plots/v_values.pkl','wb') as fid:
+with open('plots/q_values.pkl','wb') as fid:
     pickle.dump(ax, fid)
 plt.close()
 #
@@ -153,7 +153,7 @@ plt.close()
 # plot_rewards(avg_rewards, 'rand_decay')
 #
 # # Save Q table
-# np.savetxt('data/q_rand_decay.txt', q_car)
+np.savetxt('data/q_rand_decay.txt', q_car)
 # np.array(avg_rewards)
 # np.savetxt('data/avg_rewards_rand_decay.txt', avg_rewards)
 # np.array(total_steps)

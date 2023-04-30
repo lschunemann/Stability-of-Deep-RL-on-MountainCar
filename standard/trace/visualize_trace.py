@@ -26,12 +26,12 @@ for trac in trace:
     trace_discrete.append(state)
 
 # load v values plot
-plot = img.imread('../plots/v_values_rand_decay.png')
+plot = img.imread('../plots/q_values_rand_decay.png')
 
 # plot trace onto plot
 fig, ax = plt.subplots()
 # ax.imshow(plot, extent=[0, 20, 0, 20])
-with open('../plots/v_values.pkl', 'rb') as fid:
+with open('../plots/q_values.pkl', 'rb') as fid:
     ax = pickle.load(fid)
 ax.plot(*zip(*trace_discrete[::1]))
 

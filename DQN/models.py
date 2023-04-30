@@ -1,5 +1,8 @@
-from torch import nn
+import math
+import random
+import torch.nn.functional as F
 import torch
+import torch.nn as nn
 
 
 class DQN(nn.Module):
@@ -127,6 +130,197 @@ class DQN_dueling(nn.Module):
         adv = self.advantage_out(adv)
         x = Combine()(val, adv)
         return x
+
+
+class NoisyLinear(nn.Module):
+    def __init__(self, in_features, out_features, std_0=0.5):
+        super(NoisyLinear, self).__init__()
+
+        self.in_features = in_features
+        self.out_features = out_features
+        self.std_0 = std_0
+
+        self.weight_mu = nn.Parameter(torch.FloatTensor(out_features, in_features))
+        self.weight_sigma = nn.Parameter(torch.FloatTensor(out_features, in_features))
+        # self.register_buffer('weight_epsilon', torch.FloatTensor(out_features, in_features))
+
+        self.bias_mu = nn.Parameter(torch.FloatTensor(out_features))
+        self.bias_sigma = nn.Parameter(torch.FloatTensor(out_features))
+        # self.register_buffer('bias_epsilon', torch.FloatTensor(out_features))
+
+        self.reset_parameters()
+        self.reset_noise()
+
+    def forward(self, x):
+        if self.training:
+            weight = self.weight_mu + self.weight_sigma.mul(self.weight_epsilon)
+            bias = self.bias_mu + self.bias_sigma.mul(self.bias_epsilon)
+        else:
+            weight = self.weight_mu
+            bias = self.bias_mu
+
+        return F.linear(x, weight, bias)
+
+    def reset_parameters(self):
+        mu_range = 1 / math.sqrt(self.weight_mu.size(1))
+
+        self.weight_mu.data.uniform_(-mu_range, mu_range)
+        self.weight_sigma.data.fill_(self.std_0 / math.sqrt(self.weight_sigma.size(1)))
+
+        self.bias_mu.data.uniform_(-mu_range, mu_range)
+        self.bias_sigma.data.fill_(self.std_0 / math.sqrt(self.bias_sigma.size(0)))
+
+    def reset_noise(self):
+        epsilon_in = self._scale_noise(self.in_features)
+        epsilon_out = self._scale_noise(self.out_features)
+
+        self.weight_epsilon.copy_(epsilon_out.ger(epsilon_in))
+        self.bias_epsilon.copy_(self._scale_noise(self.out_features))
+
+    def _scale_noise(self, size):
+        x = torch.randn(size)
+        x = x.sign().mul(x.abs().sqrt())
+        return x
+
+
+class NoisyNet_Dueling(nn.Module):
+    def __init__(self, outputs):
+        super().__init__()
+        self.flatten = nn.Flatten()
+        self.conv1 = nn.Conv2d(4, 32, kernel_size=8, stride=4)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2)
+        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1)
+        self.value = NoisyLinear(3136, 512)
+        self.advantage = NoisyLinear(3136, 512)
+        self.value_out = NoisyLinear(512, 1)
+        self.advantage_out = NoisyLinear(512, outputs)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = nn.ReLU()(x)
+        x = self.conv2(x)
+        x = nn.ReLU()(x)
+        x = self.conv3(x)
+        x = nn.ReLU()(x)
+        x = self.flatten(x)
+        val = self.value(x)
+        val = nn.ReLU()(val)
+        val = self.value_out(val)
+        adv = self.advantage(x)
+        adv = nn.ReLU()(adv)
+        adv = self.advantage_out(adv)
+        x = Combine()(val, adv)
+        return x
+
+    def act(self, state):
+        q = self.forward(state)
+        action = q.max(1)[1].item()
+        return action
+
+    def reset_noise(self):
+        self.value.reset_noise()
+        self.value_out.reset_noise()
+        self.advantage.reset_noise()
+        self.advantage_out.reset_noise()
+
+
+class NoisyNet(nn.Module):
+    def __init__(self, outputs):
+        super().__init__()
+        self.flatten = nn.Flatten()
+        self.conv1 = nn.Conv2d(4, 32, kernel_size=8, stride=4)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2)
+        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1)
+        self.noisy1 = NoisyLinear(3136, 512)
+        self.noisy2 = NoisyLinear(512, outputs)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = nn.ReLU()(x)
+        x = self.conv2(x)
+        x = nn.ReLU()(x)
+        x = self.conv3(x)
+        x = nn.ReLU()(x)
+        x = self.flatten(x)
+        x = self.linear(x)
+        x = nn.ReLU()(x)
+        x = self.out(x)
+        return x
+
+    def act(self, state):
+        q = self.forward(state)
+        action = q.max(1)[1].item()
+        return action
+
+    def reset_noise(self):
+        self.noisy1.reset_noise()
+        self.noisy2.reset_noise()
+
+
+class Categorical_DQN(nn.Module):
+    def __init__(self, outputs, atoms=51):
+        super().__init__()
+        self.atoms = atoms
+        self.outputs = outputs
+        self.flatten = nn.Flatten()
+        self.conv1 = nn.Conv2d(4, 32, kernel_size=8, stride=4)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2)
+        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1)
+        self.linear = nn.Linear(3136, 512)
+        self.out = nn.Linear(512,  self.outputs * self.atoms)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = nn.ReLU()(x)
+        x = self.conv2(x)
+        x = nn.ReLU()(x)
+        x = self.conv3(x)
+        x = nn.ReLU()(x)
+        x = self.flatten(x)
+        x = self.linear(x)
+        x = nn.ReLU()(x)
+        x = self.out(x)
+        x = F.softmax(x.view(-1, self.num_actions, self.atoms), dim=2)
+        return x
+
+
+class Rainbow_DQN(nn.Module):
+    def __init__(self, outputs, atoms=51):
+        super().__init__()
+        self.atoms = atoms
+        self.outputs = outputs
+        self.flatten = nn.Flatten()
+        self.conv1 = nn.Conv2d(4, 32, kernel_size=8, stride=4)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2)
+        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1)
+        self.value = NoisyLinear(3136, 512)
+        self.advantage = NoisyLinear(3136, 512)
+        self.value_out = NoisyLinear(512, self.atoms)
+        self.advantage_out = NoisyLinear(512, self.outputs * self.atoms)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = nn.ReLU()(x)
+        x = self.conv2(x)
+        x = nn.ReLU()(x)
+        x = self.conv3(x)
+        x = nn.ReLU()(x)
+        x = self.flatten(x)
+        val = self.value(x)
+        val = nn.ReLU()(val)
+        val = self.value_out(val).view(-1, 1, self.atoms)
+        adv = self.advantage(x)
+        adv = nn.ReLU()(adv)
+        adv = self.advantage_out(adv).view(-1, self.outputs, self.atoms)
+        x = Combine()(val, adv).view(-1, 1, self.atoms)
+        x = F.softmax(x.view(-1, self.num_actions, self.atoms), dim=2)
+        return x
+
+    def sample_noise(self):
+        self.value.sample_noise()
+        self.value_out.sample_noise()
+        self.advantage.sample_noise()
+        self.advantage_out.sample_noise()
 
 
 class DQN_paper_old(nn.Module):

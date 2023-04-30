@@ -2,7 +2,7 @@ import torch
 import torchvision.transforms as transforms
 import torch.nn.functional as F
 import numpy as np
-from models import DQN_square, DQN_dueling
+from models import DQN_square, DQN_dueling, NoisyNet_Dueling, NoisyNet, Categorical_DQN
 import gymnasium as gym
 import random
 from helper_DQN import scale_and_resize, ReplayMemory
@@ -16,7 +16,7 @@ class TrainMountainCar:
     def __init__(self, n_training_episodes=200, gamma=0.99, learning_rate=0.1, epsilon_max=0.5,
                  epsilon_min=0.05, decay_rate=0.005, max_steps=10000, batch_size=32, fixed_target=False,
                  copy_target=10000, replay_size=100000, double=False, dueling=False, prioritized=False, debug=False,
-                 eval_epsilon=0.05, eval_episodes=25, eval_every=50):
+                 eval_epsilon=0.05, eval_episodes=25, eval_every=50, noisy=False, distributional=False):
         self.n_training_episodes = n_training_episodes
         self.gamma = gamma
         self.learning_rate = learning_rate
@@ -35,6 +35,13 @@ class TrainMountainCar:
         self.eval_epsilon = eval_epsilon
         self.eval_episodes = eval_episodes
         self.eval_every = eval_every
+        self.noisy = noisy
+        self.distributional = distributional
+        self.atoms = 51
+        self.v_max = 10
+        self.v_min = -10
+        self.supports = torch.linspace(self.v_min, self.v_max, self.atoms).view(1, 1, self.atoms).to(device)
+        self.delta = (self.v_max - self.v_min) / (self.atoms - 1)
 
     def epsilon_greedy_policy(self, policy: torch.nn.Module, X, epsilon: float, env: gym.envs):
         """
@@ -134,18 +141,42 @@ class TrainMountainCar:
         total_steps = 0
         total_rewards = []
         total_steps_list = []
+        evaluations = []
+
+        # beta for prioritized experience replay
+        if self.prioritized:
+            beta_start = 0.5
+            beta_frames = 1000
+            beta_by_frame = lambda total_steps: min(1.0, beta_start + total_steps * (1.0 - beta_start) / beta_frames)
 
         # initialize states in which Q value is measured every X episodes to track progress
         measuring_states = self.initialize_measuring_states(env)
         q_measures = []
 
         if self.prioritized:
-            experience_memory = PrioritizedReplayBuffer(alpha=0.7, beta=0.5, storage=ListStorage(self.replay_size))
+            experience_memory = PrioritizedReplayBuffer(alpha=0.7, beta=beta_start, storage=ListStorage(self.replay_size))
         else:
             experience_memory = ReplayMemory(self.replay_size)
 
         # initialize policy (and target) network
-        if self.dueling:
+        if self.distributional:
+            policy = Categorical_DQN(env.action_space.n, self.atoms)
+            target = Categorical_DQN(env.action_space.n, self.atoms)
+            target.load_state_dict(policy.state_dict())
+            target.eval()
+        elif self.noisy:
+            if self.dueling:
+                policy = NoisyNet_Dueling(env.action_space.n)
+                if self.fixed_target:
+                    target = NoisyNet_Dueling(env.action_space.n).to(device)
+                    target.load_state_dict(policy.state_dict())
+                    target.eval()
+            else:
+                policy = NoisyNet(env.action_space.n)
+                if self.fixed_target:
+                    target = NoisyNet(env.action_space.n).to(device)
+                    target.load_state_dict(policy.state_dict())
+        elif self.dueling:
             policy = DQN_dueling(env.action_space.n).to(device)
             if self.fixed_target:
                 target = DQN_dueling(env.action_space.n).to(device)
@@ -162,7 +193,10 @@ class TrainMountainCar:
         best_reward = - float('inf')
         best_policy = policy.state_dict()
 
-        optimizer = torch.optim.RMSprop(policy.parameters(), lr=self.learning_rate, weight_decay=0.99, momentum=0.95)      # remove momentum??
+        if self.distributional:
+            optimizer = torch.optim.Adam(policy.parameters(), lr=self.learning_rate, weight_decay=0.99, eps=0.01/self.batch_size)
+        else:
+            optimizer = torch.optim.RMSprop(policy.parameters(), lr=self.learning_rate, weight_decay=0.99, momentum=0.95)      # remove momentum??
 
         for episode in range(self.n_training_episodes):
             steps = 0
@@ -187,7 +221,7 @@ class TrainMountainCar:
             while True:
                 # epsilon decay based on steps
                 # epsilon = self.epsilon_min + (self.epsilon_max - self.epsilon_min) * np.exp(-self.decay_rate * total_steps)
-                epsilon = max(self.epsilon_max - ((self.epsilon_max - self.epsilon_min)/500000) * total_steps, self.epsilon_min)      # linear decay
+                epsilon = max(self.epsilon_max - ((self.epsilon_max - self.epsilon_min)/1000000) * total_steps, self.epsilon_min)      # linear decay
                 # epsilon decay based on episodes
                 # epsilon = self.epsilon_min + (self.epsilon_max - self.epsilon_min) * np.exp(-decay_rate * 100 * total_steps)
 
@@ -203,7 +237,10 @@ class TrainMountainCar:
                 X_new = torch.stack(stacked_images)
 
                 # update experience memory
-                experience_memory.add([X, action, reward, X_new], terminated)
+                if self.prioritized:
+                    experience_memory.push(X, action, reward, X_new, terminated)
+                else:
+                    experience_memory.add([X, action, reward, X_new], terminated)
 
                 # update current input to be next input
                 X = X_new
@@ -214,7 +251,8 @@ class TrainMountainCar:
                 if len(experience_memory) > self.batch_size:
                     # extract old states, actions, rewards and new states from ReplayMemory
                     if self.prioritized:
-                        experiences, info = experience_memory.sample(self.batch_size)
+                        beta = beta_by_frame(total_steps)
+                        experiences, info = experience_memory.sample(self.batch_size, beta)
                     else:
                         experiences = experience_memory.sample(self.batch_size)
                     experiences = np.asarray(experiences, dtype=object)
@@ -241,22 +279,30 @@ class TrainMountainCar:
 
                     # calculate target
                     if self.double:     # DDQN
-                        act = target(states).max(1)[1].unsqueeze(1)
+                        with torch.no_grad:
+                            act = target(states).max(1)[1].unsqueeze(1)
                     else:
                         act = a
+
+                    if self.noisy:
+                        policy.sample_noise()
+
                     state_action_values = policy(states).gather(1, act.type(torch.int64))
-                    # print(torch.mean(policy(states).max(1)[0]).item())
                     # target = r + self.gamma * np.argmax(values(x_new))
                     # update network
                     next_state_values = torch.zeros(self.batch_size, device=device)
+
+                    if self.noisy:
+                        target.sample_noise()
+
                     if self.fixed_target:
-                        next_state_values[mask] = target(next_states[mask]).max(1)[0].detach()
+                        with torch.no_grad:
+                            next_state_values[mask] = target(next_states[mask]).max(1)[0].detach()
                     else:
-                        next_state_values[mask] = policy(next_states[mask]).max(1)[0].detach()
-                    # print(torch.mean(target(next_states[mask]).max(1)[0]).item())
+                        with torch.no_grad:
+                            next_state_values[mask] = policy(next_states[mask]).max(1)[0].detach()
                     # Compute the expected Q values
                     expected_state_action_values = (next_state_values * self.gamma) + r.squeeze(1)
-                    # print(torch.mean(expected_state_action_values).item())
 
                     if self.prioritized:
                         diff = expected_state_action_values.unsqueeze(1) - state_action_values
@@ -265,8 +311,8 @@ class TrainMountainCar:
                         loss = torch.nn.MSELoss()(state_action_values,
                                                   expected_state_action_values.unsqueeze(1)).squeeze() * info['_weight']
                     else:
-                        loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
-                        # loss = torch.nn.MSELoss()(state_action_values, expected_state_action_values.unsqueeze(1)).squeeze()
+                        # loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
+                        loss = torch.nn.MSELoss()(state_action_values, expected_state_action_values.unsqueeze(1)).squeeze()
                     # Optimize the model
                     optimizer.zero_grad()
                     loss.backward()
@@ -275,11 +321,16 @@ class TrainMountainCar:
                     torch.nn.utils.clip_grad_norm_(policy.parameters(), 10.)
                     optimizer.step()
 
+                    # reset noise
+                    if self.noisy:
+                        policy.reset_noise()
+                        target.reset_noise()
+
                 # Update total reward
                 rewards += reward
 
                 # If done, finish the episode
-                if terminated:  # or truncated:
+                if terminated or steps >= self.max_steps:  # or truncated:
                     # Track rewards
                     total_rewards.append(rewards)
                     total_steps_list.append(steps)
@@ -298,6 +349,7 @@ class TrainMountainCar:
                             best_reward = eval_reward
                             best_policy = policy.state_dict()
                         print(f"Evaluation: {int(episode/self.eval_every)}\t average reward: {eval_reward}")
+                        evaluations.append(eval_reward)
 
                     # print training information
                     if self.debug:
@@ -318,5 +370,5 @@ class TrainMountainCar:
                         #     else:
                         #         torch.save(policy.state_dict(), f'data/DQN_paper_fixed_{total_steps}.pth')
 
-        return total_rewards, total_steps_list, q_measures, best_policy
+        return total_rewards, total_steps_list, q_measures, best_policy, evaluations
 
