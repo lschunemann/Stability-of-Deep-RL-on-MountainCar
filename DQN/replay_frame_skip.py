@@ -4,13 +4,14 @@ import gymnasium as gym
 import torch
 from helper_DQN import transform_to_grayscale_and_normalize, scale_and_resize
 import torchvision.transforms as transforms
-from models import DQN_square
+from models import DQN_square, NoisyNet, NoisyNet_Dueling
 import imageio
 
+model_name = "DDQN_prioritized"
 
 # load model
 model = DQN_square(3)
-model.load_state_dict(torch.load("data/DQN_paper_fixed_final.pth"))
+model.load_state_dict(torch.load(f"data/{model_name}.pth"))
 model.eval()
 
 # initialize environment
@@ -62,5 +63,5 @@ while True:
 
     if terminated or steps > 2000:  #truncated:
         print(f"finished in {steps} steps")
-        imageio.mimsave(f'video/replay_paper_fixed.gif', frames, fps=40)
+        imageio.mimsave(f'video/replay_{model_name}.gif', frames, fps=40)
         break

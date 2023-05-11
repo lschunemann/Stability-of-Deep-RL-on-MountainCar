@@ -1,5 +1,4 @@
 import math
-import random
 import torch.nn.functional as F
 import torch
 import torch.nn as nn
@@ -21,8 +20,8 @@ class DQN(nn.Module):
         self.conv4 = nn.Conv2d(32, 32, kernel_size=5, stride=(1, 2), padding=(0, 1))
         self.batch4 = nn.BatchNorm2d(32)
         self.pool4 = nn.MaxPool2d(2, stride=2)
-        self.linear = nn.Linear(192, 32)     # (2880, 256)
-        self.out = nn.Linear(32, outputs)
+        self.linear = nn.Linear(192, 512)     # (2880, 256)
+        self.out = nn.Linear(512, outputs)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -44,6 +43,36 @@ class DQN(nn.Module):
         x = self.flatten(x)
         x = self.linear(x)
         x = nn.ReLU()(x)
+        x = self.out(x)
+        return x
+
+
+class MLP(nn.Module):
+    def __init__(self, outputs):
+        super().__init__()
+        self.flatten = nn.Flatten()
+        self.linear1 = nn.Linear(28224, 512)  # 903168
+        self.linear2 = nn.Linear(512, 512)
+        self.out = nn.Linear(512, outputs)
+
+    def forward(self, x):
+        x = self.flatten(x)
+        x = nn.ReLU(self.linear1(x))
+        x = nn.ReLU(self.linear2(x))
+        x = self.out(x)
+        return x
+
+
+class MLP_state(nn.Module):
+    def __init__(self, outputs):
+        super().__init__()
+        self.linear1 = nn.Linear(2, 512)
+        self.linear2 = nn.Linear(512, 512)
+        self.out = nn.Linear(512, outputs)
+
+    def forward(self, x):
+        x = nn.ReLU()(self.linear1(x))
+        x = nn.ReLU()(self.linear2(x))
         x = self.out(x)
         return x
 
@@ -142,11 +171,11 @@ class NoisyLinear(nn.Module):
 
         self.weight_mu = nn.Parameter(torch.FloatTensor(out_features, in_features))
         self.weight_sigma = nn.Parameter(torch.FloatTensor(out_features, in_features))
-        # self.register_buffer('weight_epsilon', torch.FloatTensor(out_features, in_features))
+        self.register_buffer('weight_epsilon', torch.FloatTensor(out_features, in_features))
 
         self.bias_mu = nn.Parameter(torch.FloatTensor(out_features))
         self.bias_sigma = nn.Parameter(torch.FloatTensor(out_features))
-        # self.register_buffer('bias_epsilon', torch.FloatTensor(out_features))
+        self.register_buffer('bias_epsilon', torch.FloatTensor(out_features))
 
         self.reset_parameters()
         self.reset_noise()
@@ -181,6 +210,12 @@ class NoisyLinear(nn.Module):
         x = torch.randn(size)
         x = x.sign().mul(x.abs().sqrt())
         return x
+
+    def sample_noise(self):
+        epsilon_in = self._scale_noise(self.in_features)
+        epsilon_out = self._scale_noise(self.out_features)
+        self.weight_epsilon.copy_(epsilon_out.ger(epsilon_in))
+        self.bias_epsilon.copy_(epsilon_out)
 
 
 class NoisyNet_Dueling(nn.Module):
@@ -223,6 +258,12 @@ class NoisyNet_Dueling(nn.Module):
         self.advantage.reset_noise()
         self.advantage_out.reset_noise()
 
+    def sample_noise(self):
+        self.value.sample_noise()
+        self.value_out.sample_noise()
+        self.advantage.sample_noise()
+        self.advantage_out.sample_noise()
+
 
 class NoisyNet(nn.Module):
     def __init__(self, outputs):
@@ -242,9 +283,9 @@ class NoisyNet(nn.Module):
         x = self.conv3(x)
         x = nn.ReLU()(x)
         x = self.flatten(x)
-        x = self.linear(x)
+        x = self.noisy1(x)
         x = nn.ReLU()(x)
-        x = self.out(x)
+        x = self.noisy2(x)
         return x
 
     def act(self, state):
@@ -255,6 +296,10 @@ class NoisyNet(nn.Module):
     def reset_noise(self):
         self.noisy1.reset_noise()
         self.noisy2.reset_noise()
+
+    def sample_noise(self):
+        self.noisy1.sample_noise()
+        self.noisy2.sample_noise()
 
 
 class Categorical_DQN(nn.Module):
@@ -280,7 +325,7 @@ class Categorical_DQN(nn.Module):
         x = self.linear(x)
         x = nn.ReLU()(x)
         x = self.out(x)
-        x = F.softmax(x.view(-1, self.num_actions, self.atoms), dim=2)
+        x = F.softmax(x.view(-1, self.outputs, self.atoms), dim=2)
         return x
 
 
@@ -342,5 +387,28 @@ class DQN_paper_old(nn.Module):
         x = self.flatten(x)
         x = self.linear(x)
         x = nn.ReLU()(x)
+        x = self.out(x)
+        return x
+
+
+class DRQN(nn.Module):
+    def __init__(self, outputs):
+        super().__init__()
+        self.flatten = nn.Flatten()
+        self.conv1 = nn.Conv2d(10, 32, kernel_size=8, stride=4)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2)
+        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1)
+        self.lstm = nn.LSTM(3136, 512, bidirectional=False)
+        self.out = nn.Linear(512, outputs)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = nn.ReLU()(x)
+        x = self.conv2(x)
+        x = nn.ReLU()(x)
+        x = self.conv3(x)
+        x = nn.ReLU()(x)
+        x = self.flatten(x)
+        x, _ = self.lstm(x)
         x = self.out(x)
         return x

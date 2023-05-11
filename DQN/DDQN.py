@@ -3,6 +3,9 @@ from TrainMountainCar import TrainMountainCar
 import numpy as np
 import matplotlib.pyplot as plt
 
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
+
 device = torch.device("cuda")
 
 # Hyperparameters
@@ -13,7 +16,7 @@ max_training_steps = 10000
 
 # Exploration parameters
 epsilon_max = 1
-epsilon_min = 0.01
+epsilon_min = 0.1
 
 # replay memory parameters
 replay_size = 100000
@@ -22,7 +25,7 @@ batch_size = 32
 
 # fixed target network
 fixed_target = True
-copy_target = 30000
+copy_target = 10000
 
 
 debug = True
@@ -37,11 +40,17 @@ total_rewards, total_steps_list, q_measures, best_policy, evaluations = car.trai
 
 # Save best policy, as well as steps and q measures
 torch.save(best_policy, 'data/DDQN.pth')
-np.savetxt(f'data/steps_ddqn.txt', total_steps_list)
-np.savetxt(f'data/q_values_ddqn.txt', q_measures)
+np.savetxt(f'data/steps_DDQN.txt', total_steps_list)
+np.savetxt(f'data/q_values_DDQN.txt', q_measures)
+np.savetxt(f'data/eval_DDQN.txt', evaluations)
 
 # Plot steps over episodes
-plt.plot(np.arange(len(total_steps_list)) + 1, total_steps_list)
+plt.plot(np.arange(len(total_steps_list)) + 1, total_steps_list, label='training')
+plt.scatter([50, 100, 150, 200, 250, 300, 350, 400, 450, 500], -evaluations, color='r', marker='x', zorder=1, label='evaluations')
+N = 10
+steps_mean = running_mean(total_steps_list, N)
+plt.plot(np.arange(len(steps_mean)) + 1, steps_mean, zorder=0, label='running average')
+plt.legend()
 plt.xlabel('Episode')
 plt.ylabel('Steps')
 plt.title('Steps per Episode - DDQN')

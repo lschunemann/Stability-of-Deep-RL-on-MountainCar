@@ -1,28 +1,31 @@
+import collections
+
 import torch
 import torchvision.transforms as transforms
-import torch.nn.functional as F
 import numpy as np
 from models import DQN_square, DQN_dueling, NoisyNet_Dueling, NoisyNet, Categorical_DQN
 import gymnasium as gym
 import random
-from helper_DQN import scale_and_resize, ReplayMemory
-from torchrl.data import ListStorage, PrioritizedReplayBuffer
+from helper_DQN import scale_and_resize, ExperienceMemory, PrioritizedExperienceReplayBuffer
 
 device = torch.device("cuda")
 transform = scale_and_resize()
 
+Experience = collections.namedtuple("Experience", field_names=["state", "action", "reward", "next_state", "done"])
+
 
 class TrainMountainCar:
-    def __init__(self, n_training_episodes=200, gamma=0.99, learning_rate=0.1, epsilon_max=0.5,
-                 epsilon_min=0.05, decay_rate=0.005, max_steps=10000, batch_size=32, fixed_target=False,
+    def __init__(self, n_training_episodes=1000, gamma=0.99, learning_rate=0.1, epsilon_max=1,
+                 epsilon_min=0.05, max_steps=10000, batch_size=32, fixed_target=False,
                  copy_target=10000, replay_size=100000, double=False, dueling=False, prioritized=False, debug=False,
-                 eval_epsilon=0.05, eval_episodes=25, eval_every=50, noisy=False, distributional=False):
+                 eval_epsilon=None, eval_episodes=10, eval_every=50, noisy=False, distributional=False,
+                 epsilon_frame=500000):
         self.n_training_episodes = n_training_episodes
         self.gamma = gamma
         self.learning_rate = learning_rate
         self.epsilon_max = epsilon_max
         self.epsilon_min = epsilon_min
-        self.decay_rate = decay_rate
+        self.epsilon_frame = epsilon_frame
         self.max_steps = max_steps
         self.batch_size = batch_size
         self.fixed_target = fixed_target
@@ -32,7 +35,7 @@ class TrainMountainCar:
         self.dueling = dueling
         self.debug = debug
         self.prioritized = prioritized
-        self.eval_epsilon = eval_epsilon
+        self.eval_epsilon = epsilon_min if eval_epsilon is None else eval_epsilon
         self.eval_episodes = eval_episodes
         self.eval_every = eval_every
         self.noisy = noisy
@@ -57,7 +60,12 @@ class TrainMountainCar:
         else:
             with torch.no_grad():
                 X = X.unsqueeze(0).to(device)
-                return policy(X).max(1)[1].view(1, 1).item()
+                if self.distributional:
+                    a = policy(X) * self.supports
+                    a = a.sum(dim=2).max(1)[1].view(1, 1)
+                    return a.item()
+                else:
+                    return policy(X).max(1)[1].view(1, 1).item()
 
     def prepare_images(self, env, action):
         """
@@ -71,7 +79,7 @@ class TrainMountainCar:
         terminated = False
         for i in range(4):
             _, _, stop, _, _ = env.step(action)
-            terminated = stop if stop else terminated       # if one of the visited stated is terminal, return terminal
+            if stop: terminated = True       # if one of the visited states is terminal, return terminal
             img = env.render()
             img = transforms.ToTensor()(img)
             stacked_images.append(torch.squeeze(transform(img)))
@@ -92,6 +100,42 @@ class TrainMountainCar:
             measuring_states.append(stacked_img)
         env.reset()
         return measuring_states
+
+    def get_max_next_state_action(self, target, next_states):
+        next_dist = target(next_states) * self.supports
+        return next_dist.sum(dim=2).max(1)[1].view(next_states.size(0), 1, 1).expand(-1, -1, self.atoms)
+
+    def projection_distribution(self, target, batch_state, batch_action, batch_reward, non_final_next_states,
+                                non_final_mask, empty_next_state_values):
+        # batch_state, batch_action, batch_reward, non_final_next_states, non_final_mask, empty_next_state_values,\
+        #     indices, weights = batch_vars
+
+        with torch.no_grad():
+            max_next_dist = torch.zeros((self.batch_size, self.atoms), device=device,
+                                        dtype=torch.float) + 1. / self.atoms
+            if not empty_next_state_values:
+                max_next_action = self.get_max_next_state_action(target, non_final_next_states)
+                max_next_dist[non_final_mask] = target(non_final_next_states).gather(1, max_next_action).squeeze()
+                max_next_dist = max_next_dist.squeeze()
+
+            Tz = batch_reward.view(-1, 1) + self.gamma * self.supports.view(1, -1) * non_final_mask.to(
+                torch.float).view(-1, 1)
+            Tz = Tz.clamp(self.v_min, self.v_max)
+            b = (Tz - self.v_min) / self.delta
+            l = b.floor().to(torch.int64)
+            u = b.ceil().to(torch.int64)
+            l[(u > 0) * (l == u)] -= 1
+            u[(l < (self.atoms - 1)) * (l == u)] += 1
+
+            offset = torch.linspace(0, (self.batch_size - 1) * self.atoms, self.batch_size).unsqueeze(dim=1).expand(
+                self.batch_size, self.atoms).to(batch_action)
+            m = batch_state.new_zeros(self.batch_size, self.atoms)
+            m.view(-1).index_add_(0, (l + offset).view(-1),
+                                  (max_next_dist * (u.float() - b)).view(-1))  # m_l = m_l + p(s_t+n, a*)(u - b)
+            m.view(-1).index_add_(0, (u + offset).view(-1),
+                                  (max_next_dist * (b - l.float())).view(-1))  # m_u = m_u + p(s_t+n, a*)(b - l)
+
+        return m
 
     def eval(self, policy: torch.nn.Module, env: gym.envs):
         """
@@ -114,7 +158,7 @@ class TrainMountainCar:
             X = torch.stack(stacked_images)
             rewards = 0
 
-            for i in range(self.max_steps):      # max episode length 10000
+            for i in range(0, self.max_steps, 4):      # max episode length 10000
                 action = self.epsilon_greedy_policy(policy, X, self.eval_epsilon, env)
                 stacked_images, reward, terminated = self.prepare_images(env, action)
 
@@ -137,7 +181,7 @@ class TrainMountainCar:
         """
         env = gym.make('MountainCar-v0', render_mode='rgb_array')
 
-        # keep track of total steps and rewards (start total steps as -1 because of initial frame stack)
+        # keep track of total steps and rewards
         total_steps = 0
         total_rewards = []
         total_steps_list = []
@@ -153,26 +197,29 @@ class TrainMountainCar:
         measuring_states = self.initialize_measuring_states(env)
         q_measures = []
 
+        # initialize Experience Replay memory
         if self.prioritized:
-            experience_memory = PrioritizedReplayBuffer(alpha=0.7, beta=beta_start, storage=ListStorage(self.replay_size))
+            # experience_memory = PrioritizedReplayBuffer(alpha=0.7, beta=beta_start, storage=ListStorage(self.replay_size))
+            experience_memory = PrioritizedExperienceReplayBuffer(alpha=0.7, batch_size=self.batch_size,
+                                                                  buffer_size=self.replay_size)
         else:
-            experience_memory = ReplayMemory(self.replay_size)
+            experience_memory = ExperienceMemory(self.replay_size)
 
         # initialize policy (and target) network
         if self.distributional:
-            policy = Categorical_DQN(env.action_space.n, self.atoms)
-            target = Categorical_DQN(env.action_space.n, self.atoms)
+            policy = Categorical_DQN(env.action_space.n, self.atoms).to(device)
+            target = Categorical_DQN(env.action_space.n, self.atoms).to(device)
             target.load_state_dict(policy.state_dict())
             target.eval()
         elif self.noisy:
             if self.dueling:
-                policy = NoisyNet_Dueling(env.action_space.n)
+                policy = NoisyNet_Dueling(env.action_space.n).to(device)
                 if self.fixed_target:
                     target = NoisyNet_Dueling(env.action_space.n).to(device)
                     target.load_state_dict(policy.state_dict())
                     target.eval()
             else:
-                policy = NoisyNet(env.action_space.n)
+                policy = NoisyNet(env.action_space.n).to(device)
                 if self.fixed_target:
                     target = NoisyNet(env.action_space.n).to(device)
                     target.load_state_dict(policy.state_dict())
@@ -219,30 +266,23 @@ class TrainMountainCar:
             X = torch.stack(stacked_images)
 
             while True:
-                # epsilon decay based on steps
-                # epsilon = self.epsilon_min + (self.epsilon_max - self.epsilon_min) * np.exp(-self.decay_rate * total_steps)
-                epsilon = max(self.epsilon_max - ((self.epsilon_max - self.epsilon_min)/1000000) * total_steps, self.epsilon_min)      # linear decay
-                # epsilon decay based on episodes
-                # epsilon = self.epsilon_min + (self.epsilon_max - self.epsilon_min) * np.exp(-decay_rate * 100 * total_steps)
+                # linear epsilon decay based on steps
+                epsilon = max(self.epsilon_max - ((self.epsilon_max - self.epsilon_min)/self.epsilon_frame) *
+                              total_steps, self.epsilon_min)
 
                 # Choose the action At using epsilon greedy policy
                 action = self.epsilon_greedy_policy(policy, X, epsilon, env)
                 # take action
                 stacked_images, reward, terminated = self.prepare_images(env, action)
-                # _, reward, terminated, truncated, _ = env.step(action)
                 reward = torch.tensor([reward])
 
                 # update image stack with new state
-                # stacked_images, X_new = self.update_img_stack(env, stacked_images)
                 X_new = torch.stack(stacked_images)
 
                 # update experience memory
-                if self.prioritized:
-                    experience_memory.push(X, action, reward, X_new, terminated)
-                else:
-                    experience_memory.add([X, action, reward, X_new], terminated)
+                experience_memory.add(Experience(X, action, reward, X_new, terminated))
 
-                # update current input to be next input
+                # update current state to be next state
                 X = X_new
 
                 steps += 4
@@ -252,73 +292,79 @@ class TrainMountainCar:
                     # extract old states, actions, rewards and new states from ReplayMemory
                     if self.prioritized:
                         beta = beta_by_frame(total_steps)
-                        experiences, info = experience_memory.sample(self.batch_size, beta)
+                        idxs, experiences, weights = experience_memory.sample(beta)
+                        states, actions, _rewards, next_states, terminations = (i for i in
+                                                                                zip(*experiences))  # (torch.Tensor(vs).to(device) for vs in
+                        # zip(*experiences))
+                        weights = torch.tensor(weights).to(device)
                     else:
                         experiences = experience_memory.sample(self.batch_size)
-                    experiences = np.asarray(experiences, dtype=object)
-                    experience = experiences[:, 0]
-                    experience = np.asarray([np.array(i, dtype=object) for i in experience])
-                    states = experience[:, 0]
-                    a = experience[:, 1]
-                    r = experience[:, 2]
-                    next_states = experience[:, 3]
-                    terminations = experiences[:, 1]
-                    mask = [i for i, x in enumerate(terminations) if not x]     # get all non-final states
+                        states, actions, _rewards, next_states, terminations = (i for i in zip(*experiences))
 
-                    # change states and rewards back to tensors
+                    a = (torch.tensor(actions).long().unsqueeze(dim=1)).to(device)
+                    r = torch.tensor(_rewards).unsqueeze(dim=1).to(device)
                     states = np.vstack(states).astype(np.float32)
                     states = torch.from_numpy(states)
                     next_states = np.vstack(next_states).astype(np.float32)
                     next_states = torch.from_numpy(next_states)
-                    r = np.vstack(r).astype(np.float32)
-                    r = torch.from_numpy(r).to(device)
-                    a = np.vstack(a).astype(np.float32)
-                    a = torch.from_numpy(a).to(device)
-                    states = torch.reshape(states, (32, 4, 84, 84)).to(device)      # 80,120
+                    states = torch.reshape(states, (32, 4, 84, 84)).to(device)  # 80,120
                     next_states = torch.reshape(next_states, (32, 4, 84, 84)).to(device)
+                    mask = [i for i, x in enumerate(terminations) if not x]  # get all non-final states
 
-                    # calculate target
-                    if self.double:     # DDQN
-                        with torch.no_grad:
-                            act = target(states).max(1)[1].unsqueeze(1)
+                    if self.distributional:
+                        batch_action = a.unsqueeze(dim=-1).expand(-1, -1, self.atoms)
+                        batch_reward = r.view(-1, 1, 1)
+                        empty_next_state_values = not any(terminations)
+
+                        non_final_mask = torch.tensor([not i for i in terminations], device=device, dtype=torch.bool)
+
+                        # estimate
+                        current_dist = policy(states).gather(1, batch_action).squeeze()
+
+                        target_prob = self.projection_distribution(target, states, batch_action, batch_reward,
+                                                                   next_states[non_final_mask], non_final_mask,
+                                                                   empty_next_state_values)
+
+                        loss = -(target_prob * current_dist.log()).sum(-1)
                     else:
-                        act = a
+                        if self.noisy:
+                            policy.sample_noise()
 
-                    if self.noisy:
-                        policy.sample_noise()
+                        state_action_values = policy(states).gather(1, a.type(torch.int64))
+                        # target = r + self.gamma * np.argmax(values(x_new))
+                        # update network
+                        next_state_values = torch.zeros(self.batch_size, device=device)
 
-                    state_action_values = policy(states).gather(1, act.type(torch.int64))
-                    # target = r + self.gamma * np.argmax(values(x_new))
-                    # update network
-                    next_state_values = torch.zeros(self.batch_size, device=device)
+                        if self.noisy:
+                            target.sample_noise()
 
-                    if self.noisy:
-                        target.sample_noise()
-
-                    if self.fixed_target:
-                        with torch.no_grad:
+                        if self.double:
+                            max_next_action = policy(next_states).max(1)[1].view(-1, 1)
+                            next_state_values[mask] = target(next_states[mask]).gather(1, max_next_action[mask]).squeeze(1)
+                        elif self.fixed_target:
                             next_state_values[mask] = target(next_states[mask]).max(1)[0].detach()
-                    else:
-                        with torch.no_grad:
+                        else:
                             next_state_values[mask] = policy(next_states[mask]).max(1)[0].detach()
-                    # Compute the expected Q values
-                    expected_state_action_values = (next_state_values * self.gamma) + r.squeeze(1)
+                        # Compute the expected Q values
+                        expected_state_action_values = (next_state_values * self.gamma) + r.squeeze(1)
 
-                    if self.prioritized:
-                        diff = expected_state_action_values.unsqueeze(1) - state_action_values
-                        experience_memory.update_priority(info['index'], diff.detach().squeeze().abs().numpy().tolist())
+                        if self.prioritized:
+                            diff = expected_state_action_values.unsqueeze(1) - state_action_values
+                            experience_memory.update_priority(idxs, diff.cpu().detach().squeeze().abs().numpy().tolist())
 
-                        loss = torch.nn.MSELoss()(state_action_values,
-                                                  expected_state_action_values.unsqueeze(1)).squeeze() * info['_weight']
-                    else:
-                        # loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
-                        loss = torch.nn.MSELoss()(state_action_values, expected_state_action_values.unsqueeze(1)).squeeze()
+                            loss = torch.nn.MSELoss()(state_action_values,
+                                                      expected_state_action_values.unsqueeze(1)).squeeze() * weights
+                        else:
+                            # loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
+                            loss = torch.nn.MSELoss()(state_action_values, expected_state_action_values.unsqueeze(1)).squeeze()
+
+                    loss = loss.mean()
+
                     # Optimize the model
                     optimizer.zero_grad()
                     loss.backward()
-                    # for param in policy.parameters():
-                    #     param.grad.data.clamp_(-1, 1)
-                    torch.nn.utils.clip_grad_norm_(policy.parameters(), 10.)
+
+                    torch.nn.utils.clip_grad_norm_(policy.parameters(), 10.)    # clip gradients
                     optimizer.step()
 
                     # reset noise
@@ -343,7 +389,7 @@ class TrainMountainCar:
                         q_measures.append(torch.mean(policy(Q_states).max(1)[0]).item())
 
                     # Evaluate current policy and save optimal policy weights
-                    if episode > 0 and episode % self.eval_every == 0:
+                    if episode == self.n_training_episodes-1 or (episode > 0 and episode % self.eval_every == 0):
                         eval_reward = self.eval(policy, env)
                         if eval_reward > best_reward:
                             best_reward = eval_reward

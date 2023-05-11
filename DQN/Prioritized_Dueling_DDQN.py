@@ -2,11 +2,15 @@ import torch
 from TrainMountainCar import TrainMountainCar
 import numpy as np
 import matplotlib.pyplot as plt
+from helper_DQN import running_mean
+
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 device = torch.device("cuda")
 
 # Hyperparameters
-n_training_episodes = 500
+n_training_episodes = 1000
 gamma = 0.99
 # learning_rate = 0.00025  # 0.1
 learning_rate = 0.0000625
@@ -42,8 +46,15 @@ total_rewards, total_steps_list, q_measures, best_policy, evaluations = car.trai
 torch.save(best_policy, 'data/Prioritized_Dueling_DDQN.pth')
 np.savetxt(f'data/steps_Prioritized_Dueling_DDQN.txt', total_steps_list)
 np.savetxt(f'data/q_values_Prioritized_Dueling_DDQN.txt', q_measures)
+np.savetxt(f'data/eval_Prioritized_Dueling_DDQN.txt', evaluations)
 
-plt.plot(np.arange(len(total_steps_list)) + 1, total_steps_list)
+plt.plot(np.arange(len(total_steps_list)) + 1, total_steps_list, zorder=0, label='training')
+x = np.arange(50, n_training_episodes+1, 50)
+plt.scatter(x, [-e for e in evaluations], color='r', marker='x', zorder=1, label='evaluations')
+N = 10
+steps_mean = running_mean(total_steps_list, N)
+plt.plot(np.arange(len(steps_mean)) + 1, steps_mean, zorder=0, label='running average')
+plt.legend()
 plt.xlabel('Episode')
 plt.ylabel('Steps')
 plt.title('Steps per Episode - Prioritized_Dueling_DDQN')

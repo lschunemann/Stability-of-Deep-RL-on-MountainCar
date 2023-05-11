@@ -48,32 +48,32 @@ env = gym.make('MountainCar-v0', render_mode="rgb_array")
 #     action = env.action_space.sample()
 #     print(tiles(hash_table, numtilings, normalize_state(state, numtilings), [action]))
 
-import torchvision
-import torch
-images = []
-state = env.reset()[0]
-for i in range(4):
-    img = env.render()
-    img = np.transpose(img, (2, 0, 1))
-    img = torch.from_numpy(img)
-    img = torchvision.transforms.functional.rgb_to_grayscale(img, 1) / 255
-    images.append(torch.squeeze(img))
-    state = env.step(env.action_space.sample())
-
-X = torch.stack(images)
-
-print(X.max(1)[1])
-
-
-def conv_out_shape(shape, kernel, stride, padding):
-    h = ((shape[0] + 2 * padding[0] - (kernel[0] - 1) - 1) / stride[0]) + 1
-    w = ((shape[1] + 2 * padding[1] - (kernel[1] - 1) - 1) / stride[1]) + 1
-    return h, w
-
-def pool_out_shape(shape, kernel, stride):
-    h = ((shape[0] - (kernel[0] - 1) - 1) / stride[0]) + 1
-    w = ((shape[1] - (kernel[1] - 1) - 1) / stride[1]) + 1
-    return h, w
+# import torchvision
+# import torch
+# images = []
+# state = env.reset()[0]
+# for i in range(4):
+#     img = env.render()
+#     img = np.transpose(img, (2, 0, 1))
+#     img = torch.from_numpy(img)
+#     img = torchvision.transforms.functional.rgb_to_grayscale(img, 1) / 255
+#     images.append(torch.squeeze(img))
+#     state = env.step(env.action_space.sample())
+#
+# X = torch.stack(images)
+#
+# print(X.max(1)[1])
+#
+#
+# def conv_out_shape(shape, kernel, stride, padding):
+#     h = ((shape[0] + 2 * padding[0] - (kernel[0] - 1) - 1) / stride[0]) + 1
+#     w = ((shape[1] + 2 * padding[1] - (kernel[1] - 1) - 1) / stride[1]) + 1
+#     return h, w
+#
+# def pool_out_shape(shape, kernel, stride):
+#     h = ((shape[0] - (kernel[0] - 1) - 1) / stride[0]) + 1
+#     w = ((shape[1] - (kernel[1] - 1) - 1) / stride[1]) + 1
+#     return h, w
 
 # print(conv_out_shape((np.asarray(conv_out_shape((np.asarray(conv_out_shape((400,600), (8, 8), (2, 2), (4, 6))) / 2), (5,5), (2,2), (2,2))) / 2), (2,2), (2,2), (0,0)))
 # print(np.asarray(conv_out_shape((400, 600), (8, 8), (2, 2), (1, 1))))
@@ -110,10 +110,10 @@ def pool_out_shape(shape, kernel, stride):
 # [ 20. 20.]
 # [9. 9.]
 # [7. 7.]
-
-print(np.asarray(conv_out_shape((80, 120), (8, 8), (4, 4), (0, 0))))
-print(np.asarray(conv_out_shape((19, 29), (5, 5), (2, 2), (0, 0))))
-print(np.asarray(conv_out_shape((8, 13), (3, 3), (1, 1), (0, 0))))
+#
+# print(np.asarray(conv_out_shape((80, 120), (8, 8), (4, 4), (0, 0))))
+# print(np.asarray(conv_out_shape((19, 29), (5, 5), (2, 2), (0, 0))))
+# print(np.asarray(conv_out_shape((8, 13), (3, 3), (1, 1), (0, 0))))
 
 # conv sizes:
 # [ 19. 29.]
@@ -122,6 +122,31 @@ print(np.asarray(conv_out_shape((8, 13), (3, 3), (1, 1), (0, 0))))
 
 # linear function to decay epsilon
 # -((0.9-0.1)/1000000) * x + 0.9
+def normalize_state(state, numtilings, x_bound, v_bound):
+    x = state[0] * (numtilings / (x_bound[1] - x_bound[0]))
+    v = state[1] * (numtilings / (v_bound[1] - v_bound[0]))
+    return [x, v]
 
+def scale_state(state, x_bound, v_bound):
+    scaleFactorX = 10.0 / (x_bound[1] - x_bound[0])
+    scaleFactorV = 10.0 / (v_bound[1] - v_bound[0])
+    return [state[0] * scaleFactorX, state[1] * scaleFactorV]
 
+x_bound = [-1.2, 0.6]
+v_bound = [-0.07, 0.07]
 
+from TileCoding import IHT, tiles
+
+iht = IHT(2000)
+
+# print('state -> indices')
+# for x,v in zip(np.arange(-1.2, 0.6, 0.1), np.arange(-0.07, 0.07, 0.008)):
+#     state = normalize_state([x,v], 8, x_bound, v_bound)
+#     indices = tiles(iht, numtilings=8, floats=state)
+#     print('{0:.2f}'.format(x), ', ' '{0:.2f}'.format(v), ' -> ', indices)
+print('state -> indices')
+for x in np.arange(-1.2, 0.6, 0.1):
+    for v in np.arange(-0.07, 0.07, 0.008):
+        state = scale_state([x,v], x_bound , v_bound)
+        indices = tiles(iht, numtilings=8, floats=state)
+        print('{0:.2f}'.format(x), ', ' '{0:.2f}'.format(v), ' -> ', indices)

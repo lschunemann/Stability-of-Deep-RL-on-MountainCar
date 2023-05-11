@@ -2,11 +2,15 @@ import torch
 from TrainMountainCar import TrainMountainCar
 import numpy as np
 import matplotlib.pyplot as plt
+from helper_DQN import running_mean
+
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 device = torch.device("cuda")
 
 # Hyperparameters
-n_training_episodes = 500
+n_training_episodes = 1000
 gamma = 0.99
 learning_rate = 0.00025  # 0.1
 max_training_steps = 10000
@@ -22,14 +26,14 @@ batch_size = 32
 
 # fixed target network
 fixed_target = True
-copy_target = 30000
+copy_target = 10000
 
 
 debug = True
 distributional = True
 
 car = TrainMountainCar(n_training_episodes=n_training_episodes, gamma=gamma, learning_rate=learning_rate,
-                       epsilon_max=epsilon_max, epsilon_min=epsilon_min,
+                       epsilon_max=epsilon_max, epsilon_min=epsilon_min, distributional=distributional,
                        max_steps=max_training_steps, batch_size=batch_size, fixed_target=fixed_target,
                        copy_target=copy_target, replay_size=replay_size, debug=debug)
 
@@ -39,9 +43,16 @@ total_rewards, total_steps_list, q_measures, best_policy, evaluations = car.trai
 torch.save(best_policy, 'data/Distributional_DDQN.pth')
 np.savetxt(f'data/steps_Distributional_DDQN.txt', total_steps_list)
 np.savetxt(f'data/q_values_Distributional_DDQN.txt', q_measures)
+np.savetxt(f'data/eval_Distributional_DDQN.txt', evaluations)
 
 # Plot steps over episodes
-plt.plot(np.arange(len(total_steps_list)) + 1, total_steps_list)
+plt.plot(np.arange(len(total_steps_list)) + 1, total_steps_list, zorder=0, label='training')
+x = np.arange(50, n_training_episodes+1, 50)
+plt.scatter(x, [-e for e in evaluations], color='r', marker='x', zorder=1, label='evaluations')
+N = 10
+steps_mean = running_mean(total_steps_list, N)
+plt.plot(np.arange(len(steps_mean)) + 1, steps_mean, zorder=0, label='running average')
+plt.legend()
 plt.xlabel('Episode')
 plt.ylabel('Steps')
 plt.title('Steps per Episode - Distributional_DDQN')

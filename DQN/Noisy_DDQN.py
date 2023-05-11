@@ -3,6 +3,9 @@ from TrainMountainCar import TrainMountainCar
 import numpy as np
 import matplotlib.pyplot as plt
 
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
+
 device = torch.device("cuda")
 
 # Hyperparameters
@@ -40,9 +43,15 @@ total_rewards, total_steps_list, q_measures, best_policy, evaluations = car.trai
 torch.save(best_policy, 'data/Noisy_DDQN.pth')
 np.savetxt(f'data/steps_Noisy_DDQN.txt', total_steps_list)
 np.savetxt(f'data/q_values_Noisy_DDQN.txt', q_measures)
+np.savetxt(f'data/eval_Noisy_DDQN.txt', evaluations)
 
 # Plot steps over episodes
-plt.plot(np.arange(len(total_steps_list)) + 1, total_steps_list)
+plt.plot(np.arange(len(total_steps_list)) + 1, total_steps_list, zorder=0, label='training')
+plt.scatter([50, 100, 150, 200, 250, 300, 350, 400, 450, 500], -evaluations, color='r', marker='x', zorder=1, label='evaluations')
+N = 10
+steps_mean = running_mean(total_steps_list, N)
+plt.plot(np.arange(len(steps_mean)) + 1, steps_mean, zorder=0, label='running average')
+plt.legend()
 plt.xlabel('Episode')
 plt.ylabel('Steps')
 plt.title('Steps per Episode - Noisy_DDQN')
