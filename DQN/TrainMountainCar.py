@@ -376,7 +376,7 @@ class TrainMountainCar:
                 rewards += reward
 
                 # If done, finish the episode
-                if terminated or steps >= self.max_steps:  # or truncated:
+                if terminated or steps >= self.max_steps-1:  # or truncated:
                     # Track rewards
                     total_rewards.append(rewards)
                     total_steps_list.append(steps)

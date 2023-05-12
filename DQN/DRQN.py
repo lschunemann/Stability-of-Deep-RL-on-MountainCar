@@ -190,14 +190,14 @@ class TrainRecurrentMountainCar:
                 _, reward, terminated, _, _ = env.step(action)
                 img = env.render()
                 img = transforms.ToTensor()(img)
-                X_new = transform(img) if not terminated else None
+                X_new = transform(img) #if not terminated else None
 
-                experience_memory.add((X, action, reward, X_new))
+                experience_memory.add((X, action, reward, X_new, terminated))
 
                 steps += 1
                 total_steps += 1
 
-                if len(experience_memory) > self.batch_size:
+                if len(experience_memory) > self.batch_size * self.sequence_length:
                     # experiences = experience_memory.sample(self.batch_size)
                     # states, actions, _rewards, next_states, terminations = (i for i in zip(*experiences))
                     # a = (torch.tensor(actions).long().unsqueeze(dim=1)).to(device)
@@ -232,37 +232,53 @@ class TrainRecurrentMountainCar:
                     #     next_state_values[mask] = policy(next_states[mask]).max(1)[0].detach()
                     # # Compute the expected Q values
                     # expected_state_action_values = (next_state_values * self.gamma) + r.squeeze(1)
+                    shape = (self.batch_size, self.sequence_length, 84, 84)
 
-                    transitions, _, _ = experience_memory.sample(self.batch_size)
-
-                    batch_state, batch_action, batch_reward, batch_next_state = zip(*transitions)
-
-                    batch_state = np.vstack(batch_state).astype(np.float32)
+                    transitions = experience_memory.sample(self.batch_size)
+                    # batch_state, batch_action, batch_reward, batch_next_state, done = (i for i in zip(*transitions))
+                    # print(len(list(zip(*[zip(*transition) for transition in transitions]))))
+                    batch_state, batch_action, batch_reward, batch_next_state, done = zip(*[zip(*t) for t in transitions])
+                    # print(torch.tensor(batch_state[0]))
+                    batch_state = torch.tensor(np.vstack([np.vstack(batch).astype(np.float32) for batch in batch_state])\
+                                               .astype(np.float32), device=device).view(shape)
+                    # batch_state = np.vstack(batch_state).astype(np.float32)
                     # batch_state = torch.from_numpy(batch_state)
-                    batch_next_state = np.vstack(batch_next_state).astype(np.float32)
+                    # batch_next_state = np.vstack(batch_next_state).astype(np.float32)
+                    batch_next_state = np.vstack([np.vstack(batch).astype(np.float32) for batch in batch_next_state])\
+                                                  .astype(np.float32)
                     # batch_next_state = torch.from_numpy(batch_next_state)
 
-                    shape = (self.batch_size, self.sequence_length, 84, 84)
-                    batch_state = torch.tensor(batch_state, device=device, dtype=torch.float).view(shape)
+                    # batch_state = torch.tensor(batch_state, device=device, dtype=torch.float).view(shape)
                     batch_action = torch.tensor(batch_action, device=device, dtype=torch.long).view(
                         self.batch_size, self.sequence_length)
                     batch_reward = torch.tensor(batch_reward, device=device, dtype=torch.float).view(
                         self.batch_size, self.sequence_length)
+                    non_final_mask = torch.tensor([not i for i in done], device=device, dtype=torch.bool)#.view(32,10)
                     # get set of next states for end of each sequence
                     batch_next_state = tuple([batch_next_state[i] for i in range(len(batch_next_state)) if
-                                              (i + 1) % (self.sequence_length) == 0])
+                                              (i + 1) % self.sequence_length == 0])
 
-                    non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, batch_next_state)),
-                                                  device=device, dtype=torch.uint8)
-                    try:  # sometimes all next states are false, especially with nstep returns
-                        non_final_next_states = torch.tensor(np.array([s for s in batch_next_state if s is not None]),
-                                                             device=device, dtype=torch.float).unsqueeze(dim=1)
-                        non_final_next_states = torch.cat([batch_next_state[non_final_mask, 1:, :], non_final_next_states],
-                                                          dim=1)
-                        empty_next_state_values = False
-                    except:
-                        non_final_next_states = None
+                    # non_final_mask = torch.tensor(tuple(map(lambda s: s is not None, batch_next_state)),
+                    #                               device=device, dtype=torch.uint8)
+                    # try:  # sometimes all next states are false, especially with nstep returns
+                    #     non_final_next_states = torch.tensor(np.array([s for s in batch_next_state if s is not None]),
+                    #                                          device=device, dtype=torch.float).unsqueeze(dim=1)
+                    #     non_final_next_states = torch.cat([batch_next_state[non_final_mask, 1:, :], non_final_next_states],
+                    #                                       dim=1)
+                    #     empty_next_state_values = False
+                    # except:
+                    #     non_final_next_states = None
+                    #     empty_next_state_values = True
+                    if not any(done):
                         empty_next_state_values = True
+                    else:
+                        empty_next_state_values = False
+                    non_final_next_states = torch.tensor(np.array([s for s in batch_next_state]), device=device)#[non_final_mask]
+
+                    print(non_final_next_states.shape)
+                    # non_final_next_states = non_final_next_states[non_final_mask]
+                    non_final_next_states = torch.tensor(np.array([v.cpu() for s,v in enumerate(non_final_next_states) if not non_final_mask[s]]), device=device)
+                    print(non_final_next_states.shape)
 
                     # estimate
                     current_q_values = policy(batch_state.squeeze())
@@ -296,10 +312,13 @@ class TrainRecurrentMountainCar:
                 X = X_new
 
                 # If done, finish the episode
-                if terminated or steps >= self.max_steps:  # or truncated:
+                if terminated or steps >= self.max_steps-1:  # or truncated:
                     # Track rewards
                     total_rewards.append(rewards)
                     total_steps_list.append(steps)
+
+                    # reset sequence
+                    self.seq = [np.zeros(1) for _ in range(self.sequence_length)]
 
                     # # measure Q values in selected states
                     # Q_states = torch.stack(measuring_states).to(device)

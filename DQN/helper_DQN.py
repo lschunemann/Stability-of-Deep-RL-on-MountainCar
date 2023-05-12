@@ -170,28 +170,35 @@ class RecurrentExperienceMemory:
         if len(self.memory) > self.capacity:
             del self.memory[0]
 
+    # def sample(self, batch_size):
+    #     finish = random.sample(range(0, len(self.memory)), batch_size)
+    #     begin = [x - self.seq_length for x in finish]
+    #     samp = []
+    #     for start, end in zip(begin, finish):
+    #         # correct for sampling near beginning
+    #         final = self.memory[max(start + 1, 0):end + 1]
+    #
+    #         # correct for sampling across episodes
+    #         for i in range(len(final) - 2, -1, -1):
+    #             if final[i][3] is None:
+    #                 final = final[i + 1:]
+    #                 break
+    #
+    #         # pad beginning to account for corrections
+    #         while (len(final) < self.seq_length):
+    #             final = [(np.zeros_like(self.memory[0][0].cpu()), 0, 0, np.zeros_like(self.memory[0][3].cpu()))] + final
+    #
+    #         samp += final
+    #
+    #     # returns flattened version
+    #     return samp, None, None
+
     def sample(self, batch_size):
-        finish = random.sample(range(0, len(self.memory)), batch_size)
-        begin = [x - self.seq_length for x in finish]
-        samp = []
-        for start, end in zip(begin, finish):
-            # correct for sampling near beginning
-            final = self.memory[max(start + 1, 0):end + 1]
-
-            # correct for sampling across episodes
-            for i in range(len(final) - 2, -1, -1):
-                if final[i][3] is None:
-                    final = final[i + 1:]
-                    break
-
-            # pad beginning to account for corrections
-            while (len(final) < self.seq_length):
-                final = [(np.zeros_like(self.memory[0][0].cpu()), 0, 0, np.zeros_like(self.memory[0][3].cpu()))] + final
-
-            samp += final
-
-        # returns flattened version
-        return samp, None, None
+        idxs = random.sample(range(10, len(self.memory)), batch_size)
+        sampl = []
+        for idx in idxs:
+            sampl.append(self.memory[idx-self.seq_length:idx])
+        return sampl
 
     def __len__(self):
         return len(self.memory)
