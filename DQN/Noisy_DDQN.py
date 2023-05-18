@@ -20,8 +20,9 @@ epsilon_max = 1
 epsilon_min = 0.01
 
 # replay memory parameters
-replay_size = 100000
+replay_size = 200000
 batch_size = 32
+min_memory = 80000
 
 
 # fixed target network
@@ -34,22 +35,24 @@ double = True
 noisy = True
 
 car = TrainMountainCar(n_training_episodes=n_training_episodes, gamma=gamma, learning_rate=learning_rate,
-                       epsilon_max=epsilon_max, epsilon_min=epsilon_min,
+                       epsilon_max=epsilon_max, epsilon_min=epsilon_min, min_memory=min_memory,
                        max_steps=max_training_steps, batch_size=batch_size, fixed_target=fixed_target,
                        copy_target=copy_target, replay_size=replay_size, double=double, debug=debug, noisy=noisy)
 
-total_rewards, total_steps_list, q_measures, best_policy, evaluations = car.train()
+total_rewards, total_steps_list, q_measures, best_policy, evaluations, td_error, final_policy = car.train()
 
 # Save best policy, as well as steps and q measures
-torch.save(best_policy, 'data/Noisy_DDQN.pth')
+torch.save(best_policy, 'data/Noisy_DDQN_best.pth')
+torch.save(final_policy, 'data/Noisy_DDQN_final.pth')
 np.savetxt(f'data/steps_Noisy_DDQN.txt', total_steps_list)
 np.savetxt(f'data/q_values_Noisy_DDQN.txt', q_measures)
 np.savetxt(f'data/eval_Noisy_DDQN.txt', evaluations)
+np.savetxt(f'data/td_error_Noisy_DDQN.txt', td_error)
 
 # Plot steps over episodes
 plt.plot(np.arange(len(total_steps_list)) + 1, total_steps_list, zorder=0, label='training')
 x = np.arange(50, n_training_episodes+1, 50)
-plt.scatter(x, [-e for e in evaluations], color='r', marker='x', zorder=1, label='evaluations')
+plt.scatter(x, [-e*4 for e in evaluations], color='r', marker='x', zorder=1, label='evaluations')
 N = 10
 steps_mean = running_mean(total_steps_list, N)
 plt.plot(np.arange(len(steps_mean)) + 1, steps_mean, zorder=0, label='running average')

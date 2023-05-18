@@ -3,7 +3,7 @@ import collections
 import torch
 import torchvision.transforms as transforms
 import numpy as np
-from models import DQN_square, DQN_dueling, NoisyNet_Dueling, NoisyNet, Categorical_DQN
+from models import DQN_square, DQN_dueling, NoisyNet_Dueling, NoisyNet, Categorical_DQN, Quantile_DQN, Rainbow_DQN
 import gymnasium as gym
 import random
 from helper_DQN import scale_and_resize, ExperienceMemory, PrioritizedExperienceReplayBuffer
@@ -17,9 +17,9 @@ Experience = collections.namedtuple("Experience", field_names=["state", "action"
 class TrainMountainCar:
     def __init__(self, n_training_episodes=1000, gamma=0.99, learning_rate=0.1, epsilon_max=1,
                  epsilon_min=0.05, max_steps=10000, batch_size=32, fixed_target=False,
-                 copy_target=10000, replay_size=100000, double=False, dueling=False, prioritized=False, debug=False,
+                 copy_target=10000, replay_size=200000, double=False, dueling=False, prioritized=False, debug=False,
                  eval_epsilon=None, eval_episodes=10, eval_every=50, noisy=False, distributional=False,
-                 epsilon_frame=500000):
+                 epsilon_frame=500000, quantiles=51, quantile=False, rainbow=False, min_memory=80000):
         self.n_training_episodes = n_training_episodes
         self.gamma = gamma
         self.learning_rate = learning_rate
@@ -45,22 +45,44 @@ class TrainMountainCar:
         self.v_min = -10
         self.supports = torch.linspace(self.v_min, self.v_max, self.atoms).view(1, 1, self.atoms).to(device)
         self.delta = (self.v_max - self.v_min) / (self.atoms - 1)
+        self.num_quantiles = quantiles
+        self.cumulative_density = torch.tensor((2 * np.arange(self.num_quantiles) + 1) / (2.0 * self.num_quantiles),
+                                               device=device, dtype=torch.float)
+        self.quantile_weight = 1.0 / self.num_quantiles
+        self.quantile = quantile
+        self.rainbow = rainbow
+        self.min_memory = min_memory
 
     def epsilon_greedy_policy(self, policy: torch.nn.Module, X, epsilon: float, env: gym.envs):
         """
         Samples a random action with probability epsilon and picks the maximum action under policy network otherwise.
         :param policy: Policy Network under which to take action
-        :param X: stacked tensor of shape (4,80,120)
+        :param X: stacked tensor of shape (4,84,84)
         :param epsilon: float probability of sampling a random action
         :param env: Gymnasium environment
         :return: Randomly sampled action or maximum action under policy network
         """
-        if random.uniform(0, 1) < epsilon:
+        if self.rainbow:
+            with torch.no_grad():
+                X = X.unsqueeze(0).to(device)
+                policy.sample_noise()
+                a = policy(X) * self.supports
+                a = a.sum(dim=2).max(1)[1].view(1, 1)
+                return a.item()
+        elif self.noisy:
+            with torch.no_grad():
+                X = X.unsqueeze(0).to(device)
+                policy.sample_noise()
+                return policy(X).max(1)[1].view(1, 1).item()
+        elif random.uniform(0, 1) < epsilon:
             return env.action_space.sample()
         else:
             with torch.no_grad():
                 X = X.unsqueeze(0).to(device)
-                if self.distributional:
+                if self.quantile:
+                    a = (policy(X) * self.quantile_weight).sum(dim=2).max(dim=1)[1]
+                    return a.item()
+                elif self.distributional:
                     a = policy(X) * self.supports
                     a = a.sum(dim=2).max(1)[1].view(1, 1)
                     return a.item()
@@ -101,9 +123,159 @@ class TrainMountainCar:
         env.reset()
         return measuring_states
 
+    def init_networks(self, env):
+        if self.rainbow:
+            policy = Rainbow_DQN(env.action_space.n, self.atoms).to(device)
+            target = Rainbow_DQN(env.action_space.n, self.atoms).to(device)
+            target.load_state_dict(policy.state_dict())
+            target.eval()
+        elif self.quantile:
+            policy = Quantile_DQN(env.action_space.n, self.num_quantiles).to(device)
+            target = Quantile_DQN(env.action_space.n, self.num_quantiles).to(device)
+            target.load_state_dict(policy.state_dict())
+            target.eval()
+        elif self.distributional:
+            policy = Categorical_DQN(env.action_space.n, self.atoms).to(device)
+            target = Categorical_DQN(env.action_space.n, self.atoms).to(device)
+            target.load_state_dict(policy.state_dict())
+            target.eval()
+        elif self.noisy:
+            if self.dueling:
+                policy = NoisyNet_Dueling(env.action_space.n).to(device)
+                if self.fixed_target:
+                    target = NoisyNet_Dueling(env.action_space.n).to(device)
+                    target.load_state_dict(policy.state_dict())
+                    target.eval()
+            else:
+                policy = NoisyNet(env.action_space.n).to(device)
+                if self.fixed_target:
+                    target = NoisyNet(env.action_space.n).to(device)
+                    target.load_state_dict(policy.state_dict())
+        elif self.dueling:
+            policy = DQN_dueling(env.action_space.n).to(device)
+            if self.fixed_target:
+                target = DQN_dueling(env.action_space.n).to(device)
+                target.load_state_dict(policy.state_dict())
+                target.eval()
+        else:
+            policy = DQN_square(env.action_space.n).to(device)
+            if self.fixed_target:
+                target = DQN_square(env.action_space.n).to(device)
+                target.load_state_dict(policy.state_dict())
+                target.eval()
+        if 'target' not in locals():
+            target = None
+        return policy, target
+
+    def huber(self, x):
+        cond = (x.abs() < 1.0).float().detach()
+        return 0.5 * x.pow(2) * cond + (x.abs() - 0.5) * (1.0 - cond)
+
+    def compute_loss(self, states, a, r, next_states, terminations, policy, target, mask, experience_memory, idxs=None,
+                     weights=None):
+        if self.rainbow:
+            batch_action = a.unsqueeze(dim=-1).expand(-1, -1, self.atoms)
+            batch_reward = r.view(-1, 1, 1)
+
+            empty_next_state_values = not any(terminations)
+            non_final_mask = torch.tensor([not i for i in terminations], device=device, dtype=torch.bool)
+
+            # estimate
+            policy.sample_noise()
+            current_dist = policy(states).gather(1, batch_action).squeeze()
+
+            target_prob = self.projection_distribution(target, states, batch_action, batch_reward,
+                                                       next_states[non_final_mask], non_final_mask,
+                                                       empty_next_state_values)
+
+            loss = -(target_prob * current_dist.log()).sum(-1)
+            experience_memory.update_priority(idxs, loss.detach().squeeze().abs().cpu().numpy().tolist())
+            loss = loss * weights
+
+        elif self.quantile:
+            batch_action = a.unsqueeze(dim=-1).expand(-1, -1, self.num_quantiles)
+
+            quantiles = policy(states)
+            quantiles = quantiles.gather(1, batch_action).squeeze(1)
+
+            empty_next_state_values = not any(terminations)
+            non_final_mask = torch.tensor([not i for i in terminations], device=device, dtype=torch.bool)
+
+            quantiles_next = self.next_distribution(r, next_states, next_states[non_final_mask],
+                                                    empty_next_state_values, non_final_mask, target)
+
+            diff = quantiles_next.t().unsqueeze(-1) - quantiles.unsqueeze(0)
+
+            loss = self.huber(diff) * torch.abs(self.cumulative_density.view(1, -1) - (diff < 0).to(torch.float))
+            loss = loss.transpose(0, 1)
+            loss = loss.mean(1).sum(-1)
+
+        elif self.distributional:
+            batch_action = a.unsqueeze(dim=-1).expand(-1, -1, self.atoms)
+            batch_reward = r.view(-1, 1, 1)
+            empty_next_state_values = not any(terminations)
+
+            non_final_mask = torch.tensor([not i for i in terminations], device=device, dtype=torch.bool)
+
+            # estimate
+            current_dist = policy(states).gather(1, batch_action).squeeze()
+
+            target_prob = self.projection_distribution(target, states, batch_action, batch_reward,
+                                                       next_states[non_final_mask], non_final_mask,
+                                                       empty_next_state_values)
+
+            loss = -(target_prob * current_dist.log()).sum(-1)
+        else:
+            if self.noisy:
+                policy.sample_noise()
+
+            state_action_values = policy(states).gather(1, a.type(torch.int64))
+            # target = r + self.gamma * np.argmax(values(x_new))
+            # update network
+            next_state_values = torch.zeros(self.batch_size, device=device)
+
+            if self.noisy:
+                target.sample_noise()
+
+            if self.double:
+                max_next_action = policy(next_states).max(1)[1].view(-1, 1)
+                next_state_values[mask] = target(next_states[mask]).gather(1, max_next_action[mask]).squeeze(1)
+            elif self.fixed_target:
+                next_state_values[mask] = target(next_states[mask]).max(1)[0].detach()
+            else:
+                next_state_values[mask] = policy(next_states[mask]).max(1)[0].detach()
+            # Compute the expected Q values
+            expected_state_action_values = (next_state_values * self.gamma) + r.squeeze(1)
+
+            if self.prioritized:
+                diff = expected_state_action_values.unsqueeze(1) - state_action_values
+                experience_memory.update_priority(idxs, diff.cpu().detach().squeeze().abs().numpy().tolist())
+
+                loss = torch.nn.MSELoss()(state_action_values,
+                                          expected_state_action_values.unsqueeze(1)).squeeze() * weights
+            else:
+                # loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
+                loss = torch.nn.MSELoss()(state_action_values, expected_state_action_values.unsqueeze(1)).squeeze()
+        return loss
+
+    def next_distribution(self, r, next_states, non_final_next_states, empty_next_state_values, non_final_mask, target):
+        with torch.no_grad():
+            quantiles_next = torch.zeros((self.batch_size, self.num_quantiles), device=device, dtype=torch.float)
+            if not empty_next_state_values:
+                max_next_action = self.get_max_next_state_action(target, non_final_next_states)
+                quantiles_next[non_final_mask] = target(non_final_next_states).gather(1, max_next_action).squeeze(dim=1)
+
+            quantiles_next = r + (self.gamma * quantiles_next)
+
+        return quantiles_next
+
     def get_max_next_state_action(self, target, next_states):
-        next_dist = target(next_states) * self.supports
-        return next_dist.sum(dim=2).max(1)[1].view(next_states.size(0), 1, 1).expand(-1, -1, self.atoms)
+        if self.distributional or self.rainbow:
+            next_dist = target(next_states) * self.supports
+            return next_dist.sum(dim=2).max(1)[1].view(next_states.size(0), 1, 1).expand(-1, -1, self.atoms)
+        elif self.quantile:
+            next_dist = target(next_states) * self.quantile_weight
+            return next_dist.sum(dim=2).max(1)[1].view(next_states.size(0), 1, 1).expand(-1, -1, self.num_quantiles)
 
     def projection_distribution(self, target, batch_state, batch_action, batch_reward, non_final_next_states,
                                 non_final_mask, empty_next_state_values):
@@ -186,9 +358,10 @@ class TrainMountainCar:
         total_rewards = []
         total_steps_list = []
         evaluations = []
+        td_errors = []
 
         # beta for prioritized experience replay
-        if self.prioritized:
+        if self.prioritized or self.rainbow:
             beta_start = 0.5
             beta_frames = 1000
             beta_by_frame = lambda total_steps: min(1.0, beta_start + total_steps * (1.0 - beta_start) / beta_frames)
@@ -198,7 +371,7 @@ class TrainMountainCar:
         q_measures = []
 
         # initialize Experience Replay memory
-        if self.prioritized:
+        if self.prioritized or self.rainbow:
             # experience_memory = PrioritizedReplayBuffer(alpha=0.7, beta=beta_start, storage=ListStorage(self.replay_size))
             experience_memory = PrioritizedExperienceReplayBuffer(alpha=0.7, batch_size=self.batch_size,
                                                                   buffer_size=self.replay_size)
@@ -206,41 +379,15 @@ class TrainMountainCar:
             experience_memory = ExperienceMemory(self.replay_size)
 
         # initialize policy (and target) network
-        if self.distributional:
-            policy = Categorical_DQN(env.action_space.n, self.atoms).to(device)
-            target = Categorical_DQN(env.action_space.n, self.atoms).to(device)
-            target.load_state_dict(policy.state_dict())
-            target.eval()
-        elif self.noisy:
-            if self.dueling:
-                policy = NoisyNet_Dueling(env.action_space.n).to(device)
-                if self.fixed_target:
-                    target = NoisyNet_Dueling(env.action_space.n).to(device)
-                    target.load_state_dict(policy.state_dict())
-                    target.eval()
-            else:
-                policy = NoisyNet(env.action_space.n).to(device)
-                if self.fixed_target:
-                    target = NoisyNet(env.action_space.n).to(device)
-                    target.load_state_dict(policy.state_dict())
-        elif self.dueling:
-            policy = DQN_dueling(env.action_space.n).to(device)
-            if self.fixed_target:
-                target = DQN_dueling(env.action_space.n).to(device)
-                target.load_state_dict(policy.state_dict())
-                target.eval()
-        else:
-            policy = DQN_square(env.action_space.n).to(device)
-            if self.fixed_target:
-                target = DQN_square(env.action_space.n).to(device)
-                target.load_state_dict(policy.state_dict())
-                target.eval()
+        policy, target = self.init_networks(env)
 
         # Best values found during evaluation
         best_reward = - float('inf')
         best_policy = policy.state_dict()
 
-        if self.distributional:
+        if self.rainbow:
+            optimizer = torch.optim.Adam(policy.parameters(), lr=self.learning_rate, weight_decay=0.99, eps=0.00015)
+        elif self.distributional or self.quantile:
             optimizer = torch.optim.Adam(policy.parameters(), lr=self.learning_rate, weight_decay=0.99, eps=0.01/self.batch_size)
         else:
             optimizer = torch.optim.RMSprop(policy.parameters(), lr=self.learning_rate, weight_decay=0.99, momentum=0.95)      # remove momentum??
@@ -288,9 +435,10 @@ class TrainMountainCar:
                 steps += 4
                 total_steps += 4
 
-                if len(experience_memory) > self.batch_size:
+                # > self.batch_size
+                if len(experience_memory) >= self.min_memory:  # start learning after storing some experiences to negate correlation
                     # extract old states, actions, rewards and new states from ReplayMemory
-                    if self.prioritized:
+                    if self.prioritized or self.rainbow:
                         beta = beta_by_frame(total_steps)
                         idxs, experiences, weights = experience_memory.sample(beta)
                         states, actions, _rewards, next_states, terminations = (i for i in
@@ -301,6 +449,7 @@ class TrainMountainCar:
                         experiences = experience_memory.sample(self.batch_size)
                         states, actions, _rewards, next_states, terminations = (i for i in zip(*experiences))
 
+                    # prepare experiences
                     a = (torch.tensor(actions).long().unsqueeze(dim=1)).to(device)
                     r = torch.tensor(_rewards).unsqueeze(dim=1).to(device)
                     states = np.vstack(states).astype(np.float32)
@@ -311,54 +460,16 @@ class TrainMountainCar:
                     next_states = torch.reshape(next_states, (32, 4, 84, 84)).to(device)
                     mask = [i for i, x in enumerate(terminations) if not x]  # get all non-final states
 
-                    if self.distributional:
-                        batch_action = a.unsqueeze(dim=-1).expand(-1, -1, self.atoms)
-                        batch_reward = r.view(-1, 1, 1)
-                        empty_next_state_values = not any(terminations)
-
-                        non_final_mask = torch.tensor([not i for i in terminations], device=device, dtype=torch.bool)
-
-                        # estimate
-                        current_dist = policy(states).gather(1, batch_action).squeeze()
-
-                        target_prob = self.projection_distribution(target, states, batch_action, batch_reward,
-                                                                   next_states[non_final_mask], non_final_mask,
-                                                                   empty_next_state_values)
-
-                        loss = -(target_prob * current_dist.log()).sum(-1)
-                    else:
-                        if self.noisy:
-                            policy.sample_noise()
-
-                        state_action_values = policy(states).gather(1, a.type(torch.int64))
-                        # target = r + self.gamma * np.argmax(values(x_new))
-                        # update network
-                        next_state_values = torch.zeros(self.batch_size, device=device)
-
-                        if self.noisy:
-                            target.sample_noise()
-
-                        if self.double:
-                            max_next_action = policy(next_states).max(1)[1].view(-1, 1)
-                            next_state_values[mask] = target(next_states[mask]).gather(1, max_next_action[mask]).squeeze(1)
-                        elif self.fixed_target:
-                            next_state_values[mask] = target(next_states[mask]).max(1)[0].detach()
-                        else:
-                            next_state_values[mask] = policy(next_states[mask]).max(1)[0].detach()
-                        # Compute the expected Q values
-                        expected_state_action_values = (next_state_values * self.gamma) + r.squeeze(1)
-
-                        if self.prioritized:
-                            diff = expected_state_action_values.unsqueeze(1) - state_action_values
-                            experience_memory.update_priority(idxs, diff.cpu().detach().squeeze().abs().numpy().tolist())
-
-                            loss = torch.nn.MSELoss()(state_action_values,
-                                                      expected_state_action_values.unsqueeze(1)).squeeze() * weights
-                        else:
-                            # loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
-                            loss = torch.nn.MSELoss()(state_action_values, expected_state_action_values.unsqueeze(1)).squeeze()
+                    # calculate loss
+                    if 'idxs' not in locals():
+                        idxs = None
+                    if 'weights' not in locals():
+                        weights = None
+                    loss = self.compute_loss(states, a, r, next_states, terminations, policy, target, mask,
+                                             experience_memory, idxs, weights)
 
                     loss = loss.mean()
+                    td_errors.append(loss.cpu())  # save td errors
 
                     # Optimize the model
                     optimizer.zero_grad()
@@ -368,7 +479,7 @@ class TrainMountainCar:
                     optimizer.step()
 
                     # reset noise
-                    if self.noisy:
+                    if self.noisy or self.rainbow:
                         policy.reset_noise()
                         target.reset_noise()
 
@@ -382,16 +493,16 @@ class TrainMountainCar:
                     total_steps_list.append(steps)
 
                     # measure Q values in selected states
-                    Z = [torch.stack(measuring_state) for measuring_state in measuring_states]
-                    Q_states = torch.stack(Z).to(device)
-                    Q_states = torch.unique(Q_states, dim=0, sorted=False)  # eliminate duplicate states
                     with torch.no_grad():
+                        Z = [torch.stack(measuring_state) for measuring_state in measuring_states]
+                        Q_states = torch.stack(Z).to(device)
+                        Q_states = torch.unique(Q_states, dim=0, sorted=False)  # eliminate duplicate states
                         q_measures.append(torch.mean(policy(Q_states).max(1)[0]).item())
 
                     # Evaluate current policy and save optimal policy weights
                     if episode == self.n_training_episodes-1 or (episode > 0 and episode % self.eval_every == 0):
                         eval_reward = self.eval(policy, env)
-                        if eval_reward > best_reward:
+                        if eval_reward >= best_reward:
                             best_reward = eval_reward
                             best_policy = policy.state_dict()
                         print(f"Evaluation: {int(episode/self.eval_every)}\t average reward: {eval_reward}")
@@ -416,5 +527,5 @@ class TrainMountainCar:
                         #     else:
                         #         torch.save(policy.state_dict(), f'data/DQN_paper_fixed_{total_steps}.pth')
 
-        return total_rewards, total_steps_list, q_measures, best_policy, evaluations
+        return total_rewards, total_steps_list, q_measures, best_policy, evaluations, td_errors, policy.state_dict()
 

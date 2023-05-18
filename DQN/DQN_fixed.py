@@ -10,7 +10,7 @@ os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 device = torch.device("cuda")
 
 # Hyperparameters
-n_training_episodes = 500
+n_training_episodes = 1000
 gamma = 0.99
 learning_rate = 0.00025  # 0.1
 max_training_steps = 10000
@@ -18,10 +18,12 @@ max_training_steps = 10000
 # Exploration parameters
 epsilon_max = 1
 epsilon_min = 0.1
+eval_epsilon = 0.05
 
 # replay memory parameters
-replay_size = 100000
+replay_size = 200000
 batch_size = 32
+min_memory = 80000
 
 # fixed target network
 fixed_target = True
@@ -32,21 +34,24 @@ debug = True
 double = False
 
 car = TrainMountainCar(n_training_episodes=n_training_episodes, gamma=gamma, learning_rate=learning_rate,
-                       epsilon_max=epsilon_max, epsilon_min=epsilon_min,
+                       epsilon_max=epsilon_max, epsilon_min=epsilon_min, min_memory=min_memory,
                        max_steps=max_training_steps, batch_size=batch_size, fixed_target=fixed_target,
-                       copy_target=copy_target, double=double, debug=debug)
+                       copy_target=copy_target, double=double, debug=debug, eval_epsilon=eval_epsilon)
 
-total_rewards, total_steps_list, q_measures, best_policy, evaluations = car.train()
+total_rewards, total_steps_list, q_measures, best_policy, evaluations, td_error, final_policy = car.train()
 
 # save best policy as well as steps and q measures
-torch.save(best_policy, 'data/DQN_paper_fixed_final.pth')
+torch.save(best_policy, 'data/DQN_paper_fixed_best.pth')
+torch.save(final_policy, 'data/DQN_paper_fixed_final.pth')
 np.savetxt(f'data/steps_fixed.txt', total_steps_list)
 np.savetxt(f'data/q_values_fixed.txt', q_measures)
 np.savetxt(f'data/eval_fixed.txt', evaluations)
+np.savetxt(f'data/td_error_Distributional_DDQN.txt', td_error)
 
 # Plot steps per episode
 plt.plot(np.arange(len(total_steps_list)) + 1, total_steps_list, zorder=0, label='training')
-plt.scatter([50, 100, 150, 200, 250, 300, 350, 400, 450, 500], -evaluations, color='r', marker='x', zorder=1, label='evaluations')
+x = np.arange(50, n_training_episodes+1, 50)
+plt.scatter(x, [-e*4 for e in evaluations], color='r', marker='x', zorder=1, label='evaluations')
 N = 10
 steps_mean = running_mean(total_steps_list, N)
 plt.plot(np.arange(len(steps_mean)) + 1, steps_mean, zorder=0, label='running average')

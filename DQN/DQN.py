@@ -10,7 +10,7 @@ os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 device = torch.device("cuda")
 
 # Hyperparameters
-n_training_episodes = 500
+n_training_episodes = 1000
 gamma = 0.99
 learning_rate = 0.00025
 max_training_steps = 10000
@@ -18,14 +18,17 @@ max_training_steps = 10000
 # Exploration parameters
 epsilon_max = 1
 epsilon_min = 0.1
+eval_epsilon = 0.05
 
 # replay memory parameters
-replay_size = 100000
+replay_size = 200000
 batch_size = 32
+min_memory = 80000
 
 car = TrainMountainCar(n_training_episodes=n_training_episodes, gamma=gamma, learning_rate=learning_rate,
                        epsilon_max=epsilon_max, epsilon_min=epsilon_min, replay_size=replay_size,
-                       max_steps=max_training_steps, batch_size=batch_size, debug=True)
+                       max_steps=max_training_steps, batch_size=batch_size, debug=True, min_memory=min_memory,
+                       eval_epsilon=eval_epsilon)
 
 total_rewards, total_steps_list, q_measures, best_policy, evaluations = car.train()
 

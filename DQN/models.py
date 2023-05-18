@@ -358,7 +358,7 @@ class Rainbow_DQN(nn.Module):
         adv = nn.ReLU()(adv)
         adv = self.advantage_out(adv).view(-1, self.outputs, self.atoms)
         x = Combine()(val, adv).view(-1, 1, self.atoms)
-        x = F.softmax(x.view(-1, self.num_actions, self.atoms), dim=2)
+        x = F.softmax(x.view(-1, self.outputs, self.atoms), dim=2)
         return x
 
     def sample_noise(self):
@@ -367,6 +367,38 @@ class Rainbow_DQN(nn.Module):
         self.advantage.sample_noise()
         self.advantage_out.sample_noise()
 
+    def reset_noise(self):
+        self.value.reset_noise()
+        self.value_out.reset_noise()
+        self.advantage.reset_noise()
+        self.advantage_out.reset_noise()
+
+
+class Quantile_DQN(nn.Module):
+    def __init__(self, outputs, quantiles=51):
+        super().__init__()
+        self.quantiles = quantiles
+        self.outputs = outputs
+        self.flatten = nn.Flatten()
+        self.conv1 = nn.Conv2d(4, 32, kernel_size=8, stride=4)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2)
+        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1)
+        self.linear = nn.Linear(3136, 512)
+        self.out = nn.Linear(512,  self.outputs * self.quantiles)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = nn.ReLU()(x)
+        x = self.conv2(x)
+        x = nn.ReLU()(x)
+        x = self.conv3(x)
+        x = nn.ReLU()(x)
+        x = self.flatten(x)
+        x = self.linear(x)
+        x = nn.ReLU()(x)
+        x = self.out(x)
+        return x.view(-1, self.outputs, self.quantiles)
+    
 
 class DQN_paper_old(nn.Module):
     def __init__(self, outputs):
