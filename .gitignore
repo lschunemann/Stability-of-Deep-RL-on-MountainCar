@@ -9,3 +9,7 @@ standard/trace/trace_train.txt
 standard/trace/trace_eval.txt
 standard/trace/trace_train.txt
 standard/trace/trace_eval.txt
+.DS_Store
+__pycache__/helper.cpython-38.pyc
+DQN/__pycache__/helper_DQN.cpython-38.pyc
+DQN/__pycache__/models.cpython-38.pyc

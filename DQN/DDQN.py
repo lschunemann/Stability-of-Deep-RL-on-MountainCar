@@ -18,6 +18,7 @@ max_training_steps = 10000
 # Exploration parameters
 epsilon_max = 1
 epsilon_min = 0.1
+eval_epsilon = 0.05
 
 # replay memory parameters
 replay_size = 200000
@@ -36,7 +37,8 @@ double = True
 car = TrainMountainCar(n_training_episodes=n_training_episodes, gamma=gamma, learning_rate=learning_rate,
                        epsilon_max=epsilon_max, epsilon_min=epsilon_min, min_memory=min_memory,
                        max_steps=max_training_steps, batch_size=batch_size, fixed_target=fixed_target,
-                       copy_target=copy_target, replay_size=replay_size, double=double, debug=debug)
+                       copy_target=copy_target, replay_size=replay_size, double=double, debug=debug,
+                       eval_epsilon=eval_epsilon)
 
 total_rewards, total_steps_list, q_measures, best_policy, evaluations, td_error, policy_final = car.train()
 

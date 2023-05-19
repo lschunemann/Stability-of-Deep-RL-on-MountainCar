@@ -75,6 +75,27 @@ class MLP_state(nn.Module):
         x = nn.ReLU()(self.linear2(x))
         x = self.out(x)
         return x
+    
+    
+class MLP_Dueling_state(nn.Module):
+    def __init__(self, outputs):
+        super().__init__()
+        self.linear1 = nn.Linear(2, 512)
+        self.value = nn.Linear(512, 512)
+        self.advantage = nn.Linear(512, 512)
+        self.value_out = nn.Linear(512, 1)
+        self.advantage_out = nn.Linear(512, outputs)
+
+    def forward(self, x):
+        x = nn.ReLU()(self.linear1(x))
+        val = self.value(x)
+        val = nn.ReLU()(val)
+        val = self.value_out(val)
+        adv = self.advantage(x)
+        adv = nn.ReLU()(adv)
+        adv = self.advantage_out(adv)
+        x = Combine()(val, adv)
+        return x
 
 
 class DQN_paper(nn.Module):
