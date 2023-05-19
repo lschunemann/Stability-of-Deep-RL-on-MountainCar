@@ -14,7 +14,8 @@ learning_rate = 0.00025  # 0.1
 
 # Exploration parameters
 epsilon_max = 1
-epsilon_min = 0.01
+epsilon_min = 0.1
+eval_epsilon = 0.05
 
 
 # fixed target network

@@ -15,6 +15,7 @@ learning_rate = 0.00025  # 0.1
 # Exploration parameters
 epsilon_max = 1
 epsilon_min = 0.1
+eval_epsilon = 0.05
 
 # fixed target network
 fixed_target = True
@@ -28,6 +29,7 @@ car = TrainMountainCar(learning_rate=learning_rate,
                        epsilon_max=epsilon_max, epsilon_min=epsilon_min,
                        fixed_target=fixed_target,
                        copy_target=copy_target, double=double, debug=debug)
+
 
 total_rewards, total_steps_list, q_measures, best_policy, evaluations, td_error, policy_final = car.train()
 
