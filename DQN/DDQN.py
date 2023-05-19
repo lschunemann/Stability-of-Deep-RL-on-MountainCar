@@ -10,20 +10,11 @@ os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 device = torch.device("cuda")
 
 # Hyperparameters
-n_training_episodes = 1000
-gamma = 0.99
 learning_rate = 0.00025  # 0.1
-max_training_steps = 10000
 
 # Exploration parameters
 epsilon_max = 1
 epsilon_min = 0.1
-
-# replay memory parameters
-replay_size = 200000
-batch_size = 32
-min_memory = 80000
-
 
 # fixed target network
 fixed_target = True
@@ -33,10 +24,10 @@ copy_target = 10000
 debug = True
 double = True
 
-car = TrainMountainCar(n_training_episodes=n_training_episodes, gamma=gamma, learning_rate=learning_rate,
-                       epsilon_max=epsilon_max, epsilon_min=epsilon_min, min_memory=min_memory,
-                       max_steps=max_training_steps, batch_size=batch_size, fixed_target=fixed_target,
-                       copy_target=copy_target, replay_size=replay_size, double=double, debug=debug)
+car = TrainMountainCar(learning_rate=learning_rate,
+                       epsilon_max=epsilon_max, epsilon_min=epsilon_min,
+                       fixed_target=fixed_target,
+                       copy_target=copy_target, double=double, debug=debug)
 
 total_rewards, total_steps_list, q_measures, best_policy, evaluations, td_error, policy_final = car.train()
 
@@ -50,7 +41,8 @@ np.savetxt(f'data/td_error_DDQN.txt', td_error)
 
 # Plot steps over episodes
 plt.plot(np.arange(len(total_steps_list)) + 1, total_steps_list, label='training')
-plt.scatter([50, 100, 150, 200, 250, 300, 350, 400, 450, 500], -evaluations, color='r', marker='x', zorder=1, label='evaluations')
+x = np.arange(50, 1001, 50)
+plt.scatter(x, [-e*4 for e in evaluations], color='r', marker='x', zorder=1, label='evaluations')
 N = 10
 steps_mean = running_mean(total_steps_list, N)
 plt.plot(np.arange(len(steps_mean)) + 1, steps_mean, zorder=0, label='running average')

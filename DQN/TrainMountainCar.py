@@ -17,9 +17,9 @@ Experience = collections.namedtuple("Experience", field_names=["state", "action"
 class TrainMountainCar:
     def __init__(self, n_training_episodes=1000, gamma=0.99, learning_rate=0.1, epsilon_max=1,
                  epsilon_min=0.05, max_steps=10000, batch_size=32, fixed_target=False,
-                 copy_target=10000, replay_size=200000, double=False, dueling=False, prioritized=False, debug=False,
+                 copy_target=10000, replay_size=100000, double=False, dueling=False, prioritized=False, debug=False,
                  eval_epsilon=None, eval_episodes=10, eval_every=50, noisy=False, distributional=False,
-                 epsilon_frame=500000, quantiles=51, quantile=False, rainbow=False, min_memory=80000):
+                 epsilon_frame=1000000, quantiles=51, quantile=False, rainbow=False, min_memory=50000):
         self.n_training_episodes = n_training_episodes
         self.gamma = gamma
         self.learning_rate = learning_rate
